@@ -146,9 +146,30 @@ end
 
 -- Offline mode: the 2012 backend (api.cheekychuck.com) is gone. Hooks stay; requests fail fast.
 if not ONLINE_ENABLED then
-  -- the only web popups are the account/share pages that talked to that backend
-  native.showWebPopup = function() native.showAlert("Cheeky Chuck", "Online sharing is not available in this version.", { "OK" }) end
-  native.cancelWebPopup = function() end
+  -- Web popups are local HTML (html/): settings and the photo-comment page still work offline; only the
+  -- account pages (*accounts*.html) talked to the backend, so those become an alert.
+  -- v2 treats "html/x.html?cid=.." + baseUrl as a remote URL (the query string defeats the file lookup),
+  -- so resolve it to an absolute file:// URL ourselves and keep the query the page's JS reads.
+  local showWebPopup = native.showWebPopup
+  native.showWebPopup = function(...)
+    local a = { ... }
+    local i = type(a[1]) == "string" and 1 or 5 -- (url, opts) or (x, y, w, h, url, opts)
+    local url, opts = a[i], a[i + 1]
+    if type(url) ~= "string" then return showWebPopup(...) end
+    if url:find("accounts") then
+      native.showAlert("Cheeky Chuck", "Online sharing is not available in this version.", { "OK" })
+      return
+    end
+    if type(opts) == "table" and opts.baseUrl and not url:find("^%a+://") then
+      local path, query = url:match("^([^?]*)(.*)$")
+      local abs = system.pathForFile(path, opts.baseUrl)
+      if abs then
+        a[i] = "file:///" .. abs:gsub("\\", "/") .. query
+        a[i + 1] = { hasBackground = opts.hasBackground, urlRequest = opts.urlRequest }
+      end
+    end
+    return showWebPopup(unpack(a, 1, select("#", ...)))
+  end
   local ok, http = pcall(require, "socket.http")
   if ok and http then http.request = function() return nil, "offline (compat.lua ONLINE_ENABLED=false)" end end
   if network then

@@ -121,6 +121,24 @@ s, n_hit = re.subn(r"( +)L18_3 = L9_3\n +return L11_3\(L12_3, L13_3, L14_3, L15_
 assert n_hit == 1, f"hit debug sites: {n_hit}"
 an.write_text(s, encoding="utf-8")
 
+# Photo view offline: the comment/share web page is pointless without the backend, so show an OK
+# button over the framed photo instead; it fires the page's own "postmsg:cancel" path (back to game).
+fix_chain("screenshotview.lua",
+    "  function L12_2(A0_3)\n    local L1_3, L2_3, L3_3, L4_3, L5_3, L6_3, L7_3, L8_3, L9_3, L10_3\n    L1_3 = {}\n    L1_3.hasBackground = false\n",
+    "  function L12_2(A0_3)\n    local L1_3, L2_3, L3_3, L4_3, L5_3, L6_3, L7_3, L8_3, L9_3, L10_3\n"
+    "    if not ONLINE_ENABLED then\n"
+    "      local btn = ui.newButton({ default = HTML_DIR .. \"im/ok.png\", over = HTML_DIR .. \"im/ok.png\",\n"
+    "        onRelease = function() timer.performWithDelay(1, function() L11_2({ url = \"postmsg:cancel\" }) end) end })\n"
+    "      btn.x = WORLD_WIDTH / 2; btn.y = WORLD_HEIGHT / 2 + 140 + 140 -- just below the framed photo (centre WORLD_HEIGHT/2+140, ~200 tall)\n"
+    "      A0_3.offlineOkBtn = btn\n"
+    "      return\n"
+    "    end\n"
+    "    L1_3 = {}\n    L1_3.hasBackground = false\n")
+fix_chain("screenshotview.lua",
+    "    L0_3 = L4_2\n    L0_3.screenshotImg = nil\n    L0_3 = L4_2\n    L0_3.photoFrameImg = nil\n  end\n",
+    "    L0_3 = L4_2\n    L0_3.screenshotImg = nil\n    L0_3 = L4_2\n    L0_3.photoFrameImg = nil\n"
+    "    if L4_2.offlineOkBtn then L4_2.offlineOkBtn:removeSelf(); L4_2.offlineOkBtn = nil end\n  end\n")
+
 main = root / "main.lua"
 s = main.read_text(encoding="utf-8")
 if 'require("compat")' not in s:
