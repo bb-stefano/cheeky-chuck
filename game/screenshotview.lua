@@ -176,6 +176,7 @@ function L11_1(A0_2, A1_2, A2_2, A3_2)
     L0_3.screenshotImg = nil
     L0_3 = L4_2
     L0_3.photoFrameImg = nil
+    if L4_2.offlineOkBtn then L4_2.offlineOkBtn:removeSelf(); L4_2.offlineOkBtn = nil end
   end
   
   function L8_2()
@@ -467,6 +468,13 @@ function L11_1(A0_2, A1_2, A2_2, A3_2)
   
   function L12_2(A0_3)
     local L1_3, L2_3, L3_3, L4_3, L5_3, L6_3, L7_3, L8_3, L9_3, L10_3
+    if not ONLINE_ENABLED then
+      local btn = ui.newButton({ default = HTML_DIR .. "im/ok.png", over = HTML_DIR .. "im/ok.png",
+        onRelease = function() timer.performWithDelay(1, function() L11_2({ url = "postmsg:cancel" }) end) end })
+      btn.x = WORLD_WIDTH / 2; btn.y = WORLD_HEIGHT / 2 + 140 + 140 -- just below the framed photo (centre WORLD_HEIGHT/2+140, ~200 tall)
+      A0_3.offlineOkBtn = btn
+      return
+    end
     L1_3 = {}
     L1_3.hasBackground = false
     L2_3 = system
