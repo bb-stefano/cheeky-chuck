@@ -123,6 +123,27 @@ do
   end
 end
 
+-- display.save(group) renders the group's bounds, and v2 counts invisible children in those bounds
+-- (SCREENSHOT_GROUP holds ~60 hidden animation timelines reaching far off the scene). Park hidden
+-- children off-screen for the save so the photo is just the visible scene, as in v1.
+do
+  local save = display.save
+  display.save = function(obj, ...)
+    local parked = {}
+    local function walk(g)
+      for i = 1, g.numChildren or 0 do
+        local c = g[i]
+        if c.isVisible == false then c.x = c.x + 100000; parked[#parked + 1] = c
+        elseif c.numChildren then walk(c) end
+      end
+    end
+    if obj and obj.numChildren then walk(obj) end
+    local r = save(obj, ...)
+    for _, c in ipairs(parked) do c.x = c.x - 100000 end
+    return r
+  end
+end
+
 -- Offline mode: the 2012 backend (api.cheekychuck.com) is gone. Hooks stay; requests fail fast.
 if not ONLINE_ENABLED then
   -- the only web popups are the account/share pages that talked to that backend
