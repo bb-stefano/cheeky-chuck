@@ -1,0 +1,10 @@
+static_background=layer(name=background_valentinesday_1_static_background_sprite)
+static_background.frame(i=1,d=4,x=0,y=0,o=background_valentinesday_1_static_background-1.png)
+static_background.frame(i=5,d=1,x=0,y=0,o=background_valentinesday_1_static_background-5.png)
+static_background.frame(i=6,d=1,x=0,y=0,o=background_valentinesday_1_static_background-6.png)
+return background_valentinesday_1_static_background
+timeline=timeline(name=background_valentinesday_1,width=320,height=320,framerate=12,xref=250.0)
+layer_static_background=layer(name=layer_static_background)
+layer_static_background.frame(i=1,d=6,x=-1.0,y=-1.0,o=static_background)
+timeline.add(layer=layer_static_background)
+return timeline

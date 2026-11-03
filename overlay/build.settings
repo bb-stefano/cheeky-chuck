@@ -1,0 +1,11 @@
+settings = {
+  -- Content stays portrait; the game rotates its own UI from "orientation" events (orientation.lua).
+  orientation = { default = "portrait", supported = { "portrait" } },
+  android = {
+    usesPermissions = { "android.permission.INTERNET", "android.permission.VIBRATE" },
+  },
+  iphone = {
+    plist = { UIStatusBarHidden = true, CFBundleDisplayName = "Cheeky Chuck" },
+  },
+  excludeFiles = { all = { "*.err", "ReadMe.txt" } },
+}

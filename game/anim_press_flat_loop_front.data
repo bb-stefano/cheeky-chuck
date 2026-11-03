@@ -1,0 +1,28 @@
+arm_l_1=layer(name=press_flat_loop_front_arm_l_1_sprite)
+arm_l_1.frame(i=1,d=1,x=0,y=0,o=press_flat_loop_front_arm_l_1-1.png)
+return press_flat_loop_front_arm_l_1
+arm_r_1=layer(name=press_flat_loop_front_arm_r_1_sprite)
+arm_r_1.frame(i=1,d=1,x=0,y=0,o=press_flat_loop_front_arm_r_1-1.png)
+return press_flat_loop_front_arm_r_1
+head_1=layer(name=press_flat_loop_front_head_1_sprite)
+head_1.frame(i=1,d=1,x=0,y=0,o=press_flat_loop_front_head_1-1.png)
+head_1.frame(i=2,d=19,x=0,y=0,o=press_flat_loop_front_head_1-10.png)
+return press_flat_loop_front_head_1
+trousers_1=layer(name=press_flat_loop_front_trousers_1_sprite)
+trousers_1.frame(i=1,d=1,x=0,y=0,o=press_flat_loop_front_trousers_1-1.png)
+return press_flat_loop_front_trousers_1
+timeline=timeline(name=press_flat_loop_front,width=130.0,height=400,framerate=12,xref=48.0)
+layer_head=layer(name=layer_head)
+layer_head.frame(i=1,d=1,x=-15.15,y=372.6,o=head)
+layer_head.frame(i=2,d=19,x=-15.15,y=357.0,o=head)
+timeline.add(layer=layer_head)
+layer_arm_l=layer(name=layer_arm_l)
+layer_arm_l.frame(i=1,d=20,x=74.95,y=379.2,o=arm_l)
+timeline.add(layer=layer_arm_l)
+layer_arm_r=layer(name=layer_arm_r)
+layer_arm_r.frame(i=1,d=20,x=-58.2,y=379.55,o=arm_r)
+timeline.add(layer=layer_arm_r)
+layer_trousers=layer(name=layer_trousers)
+layer_trousers.frame(i=1,d=20,x=-33.35,y=367.5,o=trousers)
+timeline.add(layer=layer_trousers)
+return timeline
