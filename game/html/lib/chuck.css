@@ -1,0 +1,82 @@
+/*** code by EGGsist | www.eggsist.com ***/
+
+body {margin:0; padding:0; background-color:transparent; font:16px arial,tahoma,sans-serif; color:#ccc; -webkit-user-select: none;}
+form {margin:0; padding:0;}
+a {color:#ccc; text-decoration:none;}
+img {border:none;}
+p {margin:0; padding:0;}
+* {-webkit-tap-highlight-color: rgba(0, 0, 0, 0);}
+
+.mega {margin:0 auto; width:280px; padding:15px 15px 0 15px;}
+    .tabs {float:left; width:100%; margin-bottom:15px;}
+        .tabGame {float:left; display:block; width:135px; margin-right:10px; height:35px; background:url('../im/tab_game.png') 0 0 no-repeat;}
+            .tabs.zh .tabGame {background-image:url('../im/tab_game_zh.png');}
+            .tabs.it .tabGame {background-image:url('../im/tab_game_it.png');}
+            .tabs.jp .tabGame {background-image:url('../im/tab_game_jp.png');}
+        .tabGame.on {background-position:0 -44px;}
+        .tabAccounts {float:left; display:block; width:135px; height:35px; background:url('../im/tab_accounts.png') 0 0 no-repeat;}
+            .tabs.zh .tabAccounts {background-image:url('../im/tab_accounts_zh.png');}
+            .tabs.it .tabAccounts {background-image:url('../im/tab_accounts_it.png');}
+            .tabs.jp .tabAccounts {background-image:url('../im/tab_accounts_jp.png');}
+        .tabAccounts.on {background-position:0 -44px;}
+
+    .section {clear:both;}
+        .section .sTitle {margin-top:10px;}
+        .section .option {position:relative; padding:12px 95px 12px 12px; border-top:solid #555 1px;}
+        .section .option.chuck {padding:12px;}
+        .section .option.volume {padding:12px 0px 12px 12px;}
+            .option a.switch {position:absolute; display:block; width:80px; height:36px; right:0; top:3px; background:url('../im/switch_bkg.png') 0 0 no-repeat;}
+            .option a.zh {background-image:url('../im/switch_bkg_zh.png');}
+            .option a.switch.on {background-position:0 0;}
+            .option a.switch.off {background-position:0 -54px;}
+            .option a.switch.loading {background-position:0 -108px;}
+            .option a.switch.disabled {background-position:0 -162px;}
+            .loginForm {display:none; position:relative; margin-top:15px;  width:275px; height:90px; background:url('../im/login_form.png') no-repeat;}
+                .loginForm .u_name {font:16px arial,tahoma,sans-serif; background:none; border:none; margin:8px 0 5px 4px; width:165px; padding:5px;}
+                .loginForm .u_pwd {font:16px arial,tahoma,sans-serif; background:none; border:none; margin:5px 0 5px 4px; width:165px; padding:5px;}
+                .loginForm .u_submit {position:absolute; width:65px; height:65px; top:10px; right:15px; background:none; border:none;}
+        .option.black {background:#000; border:solid 1px #292929; margin:8px 0 16px 0; -webkit-border-radius:8px; -moz-border-radius:8px;}
+            .option.black a.switch {right:5px;}
+            .scroller {position:relative; margin:5px auto 0 auto; width:260px; height:36px; background:url('../im/scroller_bkg.png') 50% 50% no-repeat;}
+            .scrollerMini {float:left; position:relative; margin:12px 0 0 0; width:140px; height:36px; background:url('../im/scrollerMini_bkg.png') 50% 50% no-repeat;}
+                .cursor {position:absolute; width:36px; height:36px; top:0; left:112px; background:url('../im/cursor.png') 50% 50% no-repeat;}
+                #volumeButtons {float:right; margin:5px 0 0 0;}
+                    .volBtn {float:right; display:block; float:left; margin-right:6px; width:47px; height:47px;}
+                        .volBtn#decVolBtn {background:url('../im/vol_btn_dn.png') no-repeat;}
+                        .volBtn#incVolBtn {background:url('../im/vol_btn_up.png') no-repeat;}
+        #thumbs {}
+            #thumbs a {display:block; float:left; margin:5px 10px 10px 10px; width:76px; height:75px; background-position:50% 0; background-repeat:no-repeat;}
+            #thumbs a.on {background-position:50% -85px;}
+            #thumbs a.locked {background-position:50% -164px;}
+            #thumbs a.hidden {display:none;}
+            #thumbs a#anim_background_01 {background-image:url('../im/thumb_1.png'); margin-left:5px;}
+            #thumbs a#anim_background_02 {background-image:url('../im/thumb_2.png');}
+            #thumbs a#anim_background_03 {background-image:url('../im/thumb_3.png'); margin-right:0;}
+            #thumbs a#anim_background_christmas_01 {background-image:url('../im/thumb_s1.png'); margin-left:5px;}
+            #thumbs a#anim_background_newyear {background-image:url('../im/thumb_s1.png'); margin-left:5px;}
+            #thumbs a#anim_background_valentinesday {background-image:url('../im/thumb_s1.png'); margin-left:5px;}
+
+    #msgForm {}
+        #messageContainer {text-align:center; padding-top:15px;}
+            #message {width:260px; height:50px; margin:0 0 10px 0; padding:10px; font:16px arial,tahoma,sans-serif; color:#333; background:url('../im/msg_field.png') no-repeat; border:none; -webkit-border-radius:10px; -moz-border-radius:10px;}
+            #message::-webkit-input-placeholder {color:#777;}
+        #countContainer {text-align:right; margin-bottom:45px;}
+            #countContainer span {padding-right:60px; color:#aaa;}
+            #counter {width:50px; font:14px arial,tahoma,sans-serif; color:#fff; border:0; background:none;}
+
+    #buttonArea {position:absolute; width:310px; height:55px; bottom:10px; left:0;}
+        .ok {position:absolute; top:0; right:20px;}
+        .cancel {position:absolute; top:0; left:25px;}
+        .ok.middle {position:relative; display:block; width:60px; margin:5px auto 0 auto; right:0;}
+
+    .vPadding {padding:10px 0;}
+    .blue {color:#99CFF5;}
+    .orange {color:#FF9900;}
+
+#dlgoverlay {background-color:rgba(0,0,0,0.6); position:absolute; left:0px; top:0px; width:100%; height:100%; z-index:1000;}
+    #dlgdiv {position:absolute; width:240px; padding:15px; background:#333 url('../im/alert_bkg.png') no-repeat; color:#fff; border:2px #fff solid; -webkit-border-radius:15px; -moz-border-radius:15px;}
+        #dlgdiv p {padding:4px; margin-top:0px; overflow:hidden; text-overflow:ellipsis;}
+        #dlgdiv a {position:relative; display:block; margin:15px auto 5px auto; width:50px; padding:11px 0; text-align:center; color:#000; font-weight:bold; background:#fff90a url('../im/alert_btn_bkg.png') repeat-x; border:solid 2px #ff9900; -webkit-border-radius:15px; -moz-border-radius:15px;}
+
+#blockingLoader {background-color:rgba(0,0,0,0.6); position:absolute; left:0px; top:0px; width:100%; height:100%; z-index:1000;}
+    #blockingLoader img {position:absolute;}

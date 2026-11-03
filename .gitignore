@@ -1,0 +1,10 @@
+# unpacked APK (reproduce: unzip Cheeky+Chuck_1.5_APKPure.apk -d apk)
+apk/
+# Real-ESRGAN weights (upscale.py; download from huggingface deepghs/imgutils-models real_esrgan/)
+models/
+# runtime / tooling noise
+__pycache__/
+*.log
+*.err
+touchcmd.txt
+dev/*.png

@@ -1,0 +1,62 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+	<title>Cheeky Chuck</title>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta name="viewport" content="width=device-width; initial-scale=1.0; maximum-scale=1.0; user-scalable=0;"/>
+	<meta name="copyright" content="EGGsist Ltd" />
+	<meta http-equiv="content-language" content="en" />
+    <link rel="STYLESHEET" type="text/css" href="lib/chuck.css" />
+    <script type="text/javascript" src="lib/jquery-1.5.2.min.js"></script>
+    <script type="text/javascript" src="lib/chuck.js"></script>
+    <script type="text/javascript" src="lib/conf.js"></script>
+</head>
+
+<body>
+
+<div class="mega">
+    <div class="tabs it">
+        <span class="tabGame on">&nbsp;</span>
+        <a id="switchTab" href="android_accounts_it.html" class="tabAccounts">&nbsp;</a>
+    </div>
+
+    <div class="section">
+        <div class="sTitle vPadding"><img src="im/s_background.png"></div>
+        <div id="thumbs">
+            <a id="anim_background_christmas_01" class="hidden" href="javascript:void(null);" onclick="setBackground(this, 'anim_background_christmas_01');">&nbsp;</a>
+            <a id="anim_background_newyear" class="hidden" href="javascript:void(null);" onclick="setBackground(this, 'anim_background_newyear');">&nbsp;</a>
+            <a id="anim_background_valentinesday" class="hidden" href="javascript:void(null);" onclick="setBackground(this, 'anim_background_valentinesday');">&nbsp;</a>
+            <a id="anim_background_01" class="on" href="javascript:void(null);" onclick="setBackground(this, 'anim_background_01');">&nbsp;</a>
+            <a id="anim_background_02" class="locked" href="javascript:void(null);" onclick="setBackground(this, 'anim_background_02');">&nbsp;</a>
+            <a id="anim_background_03" class="locked" href="javascript:void(null);" onclick="setBackground(this, 'anim_background_03');">&nbsp;</a>
+        </div>
+    </div>
+
+
+    <div class="section">
+        <div class="sTitle vPadding"><img src="im/s_sound.png"></div>
+        <div class="option">
+            Effetti sonori
+            <a id="soundfx" href="javascript:void(null);" class="switch on">&nbsp;</a>
+        </div>
+        <div class="option">
+            Musica
+            <a id="soundbg" href="javascript:void(null);" class="switch on">&nbsp;</a>
+        </div>
+        <div class="option volume">
+            Volume
+            <div class="volumeFloat">
+                <div id="volumeScroller" class="scrollerMini">
+                    <a href="javascript:void(null);" class="cursor" onfocus="this.blur();">&nbsp;</a>
+                </div>
+                <div id="volumeButtons">
+                    <a href="javascript:void(null);" id="decVolBtn" class="volBtn">&nbsp;</a>
+                    <a href="javascript:void(null);" id="incVolBtn" class="volBtn">&nbsp;</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>
