@@ -29,7 +29,7 @@ function M.show(opts)
   local g = v.group
   local bg = display.newRect(0, 0, display.contentWidth, display.contentHeight)
   bg:setFillColor(0, 0, 0, 220)
-  local function swallow() return true end
+  local function swallow() native.setKeyboardFocus(nil); return true end -- tap outside the fields hides the keyboard
   bg:addEventListener("touch", swallow); bg:addEventListener("tap", swallow)
   g:insert(bg)
   local cx = display.contentWidth / 2
@@ -52,8 +52,8 @@ function M.show(opts)
       busy = false
       print("[acct] " .. (ok and "ok" or ("error " .. tostring(d.error))))
       if v.closed then return end
-      if ok then close(account.token() ~= nil)
-      else native.showAlert("Cheeky Chuck", tostring(d.error), { "OK" }) end
+      if not ok then native.showAlert("Cheeky Chuck", tostring(d.error), { "OK" }) end
+      if ok or not account.token() then close(account.token() ~= nil) end -- token gone (offline logout, dead token): screen is stale
     end
     fn(unpack(args))
   end
@@ -74,7 +74,7 @@ function M.show(opts)
       if v.password.text == "" then native.showAlert("Cheeky Chuck", T("UI_PASSWORD_CONFIRM"), { "OK" }); return end
       run(account.delete, v.password.text)
     end)
-    button("ok.png", T("UI_CLOSE"), 250, function() close(true) end)
+    button("ok.png", T("UI_CLOSE"), 250, function() if not busy then close(account.token() ~= nil) end end)
   else
     v.email = field(cx, 130, T("UI_EMAIL"))
     v.email.inputType = "email"
@@ -82,7 +82,7 @@ function M.show(opts)
     v.password.isSecure = true
     button("ok.png", T("UI_REGISTER"), 70, function() run(account.register, v.email.text, v.password.text) end)
     button("send.png", T("UI_LOGIN"), 160, function() run(account.login, v.email.text, v.password.text) end)
-    button("cancel.png", T("UI_CANCEL"), 250, function() close(false) end)
+    button("cancel.png", T("UI_CANCEL"), 250, function() if not busy then close(false) end end)
   end
 end
 
