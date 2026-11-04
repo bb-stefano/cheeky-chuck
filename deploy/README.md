@@ -39,7 +39,7 @@ Smoke test: `curl https://cheekychuck.jocogiant.com/api/gallery`. Production e2e
 
 The API hands mail to Postfix on the box (`127.0.0.1:25`, no auth, no TLS), which signs it with OpenDKIM and delivers it directly. Needed once, outside this repo:
 
-- Postfix + OpenDKIM installed and running on the box.
+- Postfix + OpenDKIM installed and running on the box. Postfix is send-only: `inet_interfaces = loopback-only`, `mydestination = localhost.localdomain, localhost` (never jocogiant.com), `allow_percent_hack = no`, `swap_bangpath = no` (so a recipient like `victim%evil.com@localhost.localdomain` is not relayed), milter `inet:127.0.0.1:8891`; OpenDKIM signs `*@jocogiant.com` with selector `cc`, key `/etc/opendkim/keys/cc.private`.
 - Outbound port 25 unblocked by Hetzner (blocked by default on new accounts; ask support).
 - PTR (reverse DNS) of `135.181.204.213` set to `cheekychuck.jocogiant.com` (Hetzner console).
 - SPF for jocogiant.com includes `ip4:135.181.204.213`.

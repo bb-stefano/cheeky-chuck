@@ -42,7 +42,7 @@ test('rejects bad bodies',async()=>{
 
 test('address syntax nodemailer would re-parse is a 400',async()=>{
  const {app,db,sent}=makeApp(),token=await register(app);
- for(const to of ['x<victim@evil.com>','g:victim@evil.com;','victim@evil.com(c)','root,victim@evil.com','"v"@evil.com','v@evil','a b@evil.com',`${'a'.repeat(250)}@e.co`])
+ for(const to of ['x<victim@evil.com>','g:victim@evil.com;','victim@evil.com(c)','root,victim@evil.com','victim%evil.com@localhost.localdomain','evil.com!victim@localhost.localdomain','"v"@evil.com','v@evil','a b@evil.com',`${'a'.repeat(250)}@e.co`])
   assert.equal((await send(app,token,{to})).status,400,to);
  assert.equal(await count(db,'photos'),0);assert.equal(sent.length,0);
 });
