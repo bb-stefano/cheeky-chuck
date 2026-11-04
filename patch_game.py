@@ -121,11 +121,17 @@ s, n_hit = re.subn(r"( +)L18_3 = L9_3\n +return L11_3\(L12_3, L13_3, L14_3, L15_
 assert n_hit == 1, f"hit debug sites: {n_hit}"
 an.write_text(s, encoding="utf-8")
 
+# Photo view online: the native send-to-a-friend screen (photosend.lua) replaces the web page; sent -> remove
+# photo+frame (L7_2) and show the game's own "uploaded" screen (L8_2); cancel -> the page's "postmsg:cancel" path.
 # Photo view offline: the comment/share web page is pointless without the backend, so show an OK
 # button over the framed photo instead; it fires the page's own "postmsg:cancel" path (back to game).
 fix_chain("screenshotview.lua",
     "  function L12_2(A0_3)\n    local L1_3, L2_3, L3_3, L4_3, L5_3, L6_3, L7_3, L8_3, L9_3, L10_3\n    L1_3 = {}\n    L1_3.hasBackground = false\n",
     "  function L12_2(A0_3)\n    local L1_3, L2_3, L3_3, L4_3, L5_3, L6_3, L7_3, L8_3, L9_3, L10_3\n"
+    "    if ONLINE_ENABLED then\n"
+    "      require(\"photosend\").show({ onSent = function() L7_2(); L8_2() end, onCancel = function() L11_2({ url = \"postmsg:cancel\" }) end })\n"
+    "      return\n"
+    "    end\n"
     "    if not ONLINE_ENABLED then\n"
     "      local btn = ui.newButton({ default = HTML_DIR .. \"im/ok.png\", over = HTML_DIR .. \"im/ok.png\",\n"
     "        onRelease = function() timer.performWithDelay(1, function() L11_2({ url = \"postmsg:cancel\" }) end) end })\n"
@@ -165,6 +171,7 @@ ACCOUNT_STRINGS = [
         "サーバーに接続できません。接続を確認してください。", "无法连接服务器，请检查网络连接。"),
     ("UI_CLOSE", 312, "Close", "Chiudi", "閉じる", "关闭"),
     ("UI_PASSWORD_CONFIRM", 313, "Password to confirm", "Password per confermare", "確認用パスワード", "输入密码以确认"),
+    ("UI_COMMENT", 314, "Tap to write a comment", "Tocca qui per inserire un commento", "コメントを書込む", "点此处给出评论"),  # postmsg_*.html placeholders
 ]
 loc = root / "localization.lua"
 s = loc.read_text(encoding="utf-8")
