@@ -8,3 +8,5 @@ __pycache__/
 *.err
 touchcmd.txt
 dev/*.png
+node_modules/
+*.db
