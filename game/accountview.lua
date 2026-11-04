@@ -47,13 +47,14 @@ function M.show(opts)
   local function run(fn, ...)
     if busy or v.closed then return end
     busy = true
+    local had = account.token() ~= nil
     local args = { ... }
     args[#args + 1] = function(ok, d)
       busy = false
       print("[acct] " .. (ok and "ok" or ("error " .. tostring(d.error))))
       if v.closed then return end
       if not ok then native.showAlert("Cheeky Chuck", tostring(d.error), { "OK" }) end
-      if ok or not account.token() then close(account.token() ~= nil) end -- token gone (offline logout, dead token): screen is stale
+      if ok or (had and not account.token()) then close(account.token() ~= nil) end -- token vanished (offline logout, dead token): screen is stale
     end
     fn(unpack(args))
   end
