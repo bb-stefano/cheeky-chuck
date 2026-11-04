@@ -71,3 +71,36 @@ export async function postPhoto({db,body,session,ip,now,photosDir,mailer,env,bui
  }
  return Response.json({id,url,delivered:true});
 }
+
+const json=(body,status=200)=>Response.json(body,{status,headers:{'Cache-Control':'no-store'}});
+const num=v=>/^\d+$/.test(v??'')?Number(v):null;
+const pub=r=>({id:r.id,comment:r.comment,created:r.created,url:`/photos/${r.id}.jpg`});
+
+// GET /api/gallery: one visible photo by ?id=, else a page of them, newest first.
+export async function gallery({db,url}){
+ const id=num(url.searchParams.get('id'));
+ if(id!==null){
+  const r=await db.prepare('SELECT id, comment, created FROM photos WHERE id=? AND hidden=0').bind(id).first();
+  return r?json(pub(r)):json({error:'Not found'},404);
+ }
+ const before=num(url.searchParams.get('before')),limit=Math.min(60,Math.max(1,num(url.searchParams.get('limit'))??30));
+ const {results}=await db.prepare('SELECT id, comment, created FROM photos WHERE hidden=0 AND (?1 IS NULL OR id<?1) ORDER BY id DESC LIMIT ?2').bind(before,limit).all();
+ return json(results.map(pub));
+}
+
+// GET|POST /api/unsubscribe?t=: block the address in the signed token (POST is the mail clients' one-click form).
+export async function unsubscribe({db,url,env}){
+ const email=emailFromToken(url.searchParams.get('t')??'',env.CC_SECRET);
+ if(!email)return json({error:'This unsubscribe link is not valid.'},400);
+ await db.prepare('INSERT OR IGNORE INTO blocked(to_hash,created) VALUES(?,?)').bind(hashEmail(email),Date.now()).run();
+ return new Response(`<!doctype html><meta charset="utf-8"><title>Cheeky Chuck</title><p>You won't get Cheeky Chuck photos again.</p>`,{headers:{'Content-Type':'text/html; charset=utf-8','Cache-Control':'no-store'}});
+}
+
+// Account deletion: the photo files, then their mails and rows.
+export async function deleteAccountPhotos({db,photosDir,accountId}){
+ const {results}=await db.prepare('SELECT id FROM photos WHERE account=?').bind(accountId).all();
+ for(const {id} of results)rmSync(join(photosDir,`${id}.jpg`),{force:true});
+ await db.batch([
+  db.prepare('DELETE FROM mails WHERE photo IN (SELECT id FROM photos WHERE account=?)').bind(accountId),
+  db.prepare('DELETE FROM photos WHERE account=?').bind(accountId)]);
+}
