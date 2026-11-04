@@ -1,0 +1,36 @@
+# Installed as /etc/caddy/sites/cheekychuck.caddy; the website's Caddyfile imports /etc/caddy/sites/*.caddy.
+# The static site (site/ in /srv/cheekychuck), the photos the API stores in /var/lib/cheekychuck/photos, and the API (server/, cheekychuck.service).
+cheekychuck.jocogiant.com {
+    encode zstd gzip
+    header {
+        X-Content-Type-Options "nosniff"
+        Referrer-Policy "no-referrer"
+    }
+    handle /api/photo {
+        request_body {
+            max_size 4MB
+        }
+        reverse_proxy 127.0.0.1:8095
+    }
+    handle /api/* {
+        request_body {
+            max_size 64KB
+        }
+        reverse_proxy 127.0.0.1:8095
+    }
+    # /photos/<id>.jpg is /var/lib/cheekychuck/photos/<id>.jpg; photos never change once stored.
+    handle /photos/* {
+        root * /var/lib/cheekychuck
+        header Cache-Control "public, max-age=31536000, immutable"
+        file_server
+    }
+    handle {
+        root * /srv/cheekychuck
+        # /gallery and /gallery/ serve gallery/index.html
+        try_files {path} {path}/index.html {path}.html
+        # Fonts and screenshots rarely change: browsers keep them a week.
+        @assets path /assets/*
+        header @assets Cache-Control "public, max-age=604800"
+        file_server
+    }
+}

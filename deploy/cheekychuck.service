@@ -1,0 +1,20 @@
+[Unit]
+Description=Cheeky Chuck photo sharing API
+After=network.target
+
+[Service]
+ExecStart=/usr/bin/node /opt/cheekychuck/server/server.mjs
+WorkingDirectory=/opt/cheekychuck
+Environment=PORT=8095
+Environment=NODE_ENV=production
+EnvironmentFile=/etc/cheekychuck.env
+User=caddy
+Group=caddy
+Restart=on-failure
+NoNewPrivileges=true
+ProtectSystem=strict
+ReadWritePaths=/var/lib/cheekychuck
+MemoryMax=200M
+
+[Install]
+WantedBy=multi-user.target
