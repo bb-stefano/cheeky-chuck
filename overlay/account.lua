@@ -43,7 +43,7 @@ function M.request(method, path, body, cb)
     end
     if e.status == 401 and data.signedOut then save(nil, nil) end -- dead token
     if cb then cb(e.status ~= nil and e.status >= 200 and e.status < 300 and not data.error, data) end
-  end, { headers = headers, body = body and json.encode(body) or nil })
+  end, { headers = headers, body = body and json.encode(body) or nil, timeout = 60 }) -- the server's SMTP send gives up well before this
 end
 
 function M.call(action, fields, cb)
