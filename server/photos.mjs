@@ -47,19 +47,25 @@ export async function postPhoto({db,body,session,ip,now,photosDir,mailer,env,bui
  if(await countMails(db,'WHERE m.created>?',since)>=Number(env.CC_MAX_MAILS_PER_DAY||200))return fail(503,'Photo sharing is busy right now. Please try again tomorrow.');
  const toHash=hashEmail(v.to);
  if(ipBlocked(ip,now)||
-  await countMails(db,'JOIN photos p ON p.id=m.photo WHERE p.account=? AND m.created>?',session.id,since)>=limits.perAccount||
+  (await db.prepare('SELECT count(*) AS n FROM photos WHERE account=? AND created>?').bind(session.id,since).first()).n>=limits.perAccount||
   await countMails(db,'WHERE m.to_hash=? AND m.created>?',toHash,since)>=limits.perRecipient)return fail(429,'You have sent enough photos for today.');
 
  const {id}=await db.prepare('INSERT INTO photos(account,comment,created) VALUES(?,?,?) RETURNING id').bind(session.id,v.comment,now).first();
- const file=join(photosDir,`${id}.jpg`),undo=async()=>{await db.prepare('DELETE FROM mails WHERE photo=?').bind(id).run();await db.prepare('DELETE FROM photos WHERE id=?').bind(id).run();rmSync(file,{force:true});};
- const url=`${env.CC_PUBLIC_URL}/gallery?id=${id}`;
+ const file=join(photosDir,`${id}.jpg`),url=`${env.CC_PUBLIC_URL}/gallery?id=${id}`;
+ // Each removal is tried even if an earlier one fails; failures are logged.
+ const undo=async()=>{
+  for(const step of [()=>db.prepare('DELETE FROM mails WHERE photo=?').bind(id).run(),()=>db.prepare('DELETE FROM photos WHERE id=?').bind(id).run(),()=>rmSync(file,{force:true})])
+   try{await step();}catch(e){console.error('photo cleanup failed',e);}
+ };
+ try{writeFileSync(file,v.bytes);}
+ catch(e){console.error('photo write failed',e);await undo();return fail(500,'Something went wrong. Please try again.');}
  try{
-  writeFileSync(file,v.bytes);
   if(await db.prepare('SELECT 1 AS x FROM blocked WHERE to_hash=?').bind(toHash).first())return Response.json({id,url,delivered:false});
   await db.prepare('INSERT INTO mails(photo,to_hash,created) VALUES(?,?,?)').bind(id,toHash,now).run();
   const mail=buildMail({lang:v.lang,comment:v.comment,id,publicUrl:env.CC_PUBLIC_URL,unsubscribeUrl:`${env.CC_PUBLIC_URL}/api/unsubscribe?t=${unsubscribeToken(v.to,env.CC_SECRET)}`});
-  await mailer.send({to:v.to,...mail});
- }catch{
+  await mailer.send({to:v.to,...mail,url});
+ }catch(e){
+  console.error('photo mail failed',e);
   await undo();
   return fail(502,'Could not send the email. Please try again later.');
  }

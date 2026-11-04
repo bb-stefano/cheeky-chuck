@@ -1,6 +1,6 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
-import {existsSync} from 'node:fs';
+import {existsSync,rmSync} from 'node:fs';
 import {join} from 'node:path';
 import {makeApp,post,register} from './helpers.mjs';
 import {hashEmail,unsubscribeToken,emailFromToken} from '../server/photos.mjs';
@@ -78,9 +78,26 @@ test('global cap',async()=>{
  assert.equal(await count(db,'photos'),1);
 });
 
-test('smtp failure removes the photo',async()=>{
+test('smtp failure removes the photo',async(t)=>{
+ t.mock.method(console,'error',()=>{});
  const {app,db,photosDir}=makeApp({mailer:{send:async()=>{throw new Error('smtp down');}}}),token=await register(app);
  const r=await send(app,token);
  assert.equal(r.status,502);assert.equal((await r.json()).error,'Could not send the email. Please try again later.');
  assert.equal(await count(db,'photos'),0);assert.equal(await count(db,'mails'),0);assert.ok(!existsSync(join(photosDir,'1.jpg')));
+});
+
+test('account limit counts photos to blocked recipients too',async()=>{
+ const {app,db}=makeApp(),token=await register(app);
+ await db.prepare('INSERT INTO blocked(to_hash,created) VALUES(?,?)').bind(hashEmail('bob@example.com'),Date.now()).run();
+ for(let i=0;i<10;i++)assert.equal((await send(app,token,i<5?{}:{to:`f${i}@example.com`},{ip:`6.6.6.${i}`})).status,200);
+ assert.equal((await send(app,token,{},{ip:'6.6.6.99'})).status,429);
+ assert.equal(await count(db,'photos'),10);
+});
+
+test('unwritable photo directory is a 500 and leaves no row',async(t)=>{
+ t.mock.method(console,'error',()=>{});
+ const {app,db,photosDir}=makeApp(),token=await register(app);
+ rmSync(photosDir,{recursive:true});
+ const r=await send(app,token);
+ assert.equal(r.status,500);assert.equal(await count(db,'photos'),0);
 });

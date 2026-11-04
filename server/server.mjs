@@ -8,11 +8,11 @@ import {join,dirname} from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {openD1} from './sqlite-d1.mjs';
 import {createApp} from './app.mjs';
+import {hashEmail} from './photos.mjs';
 
 const env=process.env,HERE=dirname(fileURLToPath(import.meta.url));
 // Placeholder until the SMTP mailer lands: print the mail instead of sending it.
-const mailer={async send({to,subject,text}){console.log(`[mail] to=${to} subject=${subject}
-${text}`);}};
+const mailer={async send({to,subject,url}){console.log(`[mail] to=${hashEmail(to).slice(0,8)} subject=${subject} link=${url}`);}};
 const app=createApp({db:openD1(env.CC_DB||'cheekychuck.db',join(HERE,'migrations')),photosDir:env.CC_PHOTOS||'./photos',mailer,env});
 
 async function body(req,max=4*1024*1024){let size=0;const parts=[];for await(const part of req){size+=part.length;if(size>max)throw Object.assign(Error('too large'),{status:413});parts.push(part);}return Buffer.concat(parts);}
