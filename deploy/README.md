@@ -1,0 +1,49 @@
+# Deploying Cheeky Chuck
+
+Site (`site/`, static) and API (`server/`, Node 22 on 127.0.0.1:8095) at https://cheekychuck.jocogiant.com, behind Caddy on the Hetzner box (same setup as lastcampfire / squidmaze).
+
+## 1. Env file (once, on the box)
+
+Create `/etc/cheekychuck.env`, root-owned, mode 600 (`chmod 600`). systemd reads it; the service never needs to. Example values only, use your own secrets:
+
+```
+CC_DB=/var/lib/cheekychuck/cheekychuck.db
+CC_PHOTOS=/var/lib/cheekychuck/photos
+CC_SECRET=<long random string, e.g. openssl rand -hex 32>
+CC_APP_ORIGINS=app://cheekychuck
+CC_PUBLIC_URL=https://cheekychuck.jocogiant.com
+CC_MAX_MAILS_PER_DAY=200
+SMTP_HOST=smtp.example.com
+SMTP_PORT=587
+SMTP_USER=contact@jocogiant.com
+SMTP_PASS=<smtp password>
+```
+
+`deploy.sh` refuses to copy or install anything until all of these keys are present.
+
+## 2. DNS (once)
+
+At the DNS provider for jocogiant.com add an `A` record: name `cheekychuck`, value `135.181.204.213`. Caddy gets the HTTPS certificate on the first request after it propagates.
+
+## 3. Deploy
+
+```
+bash deploy/deploy.sh
+```
+
+It checks the env file on the box, runs `npm test`, installs production-only `node_modules` in a temp dir (your local `node_modules` is untouched), uploads, swaps `/srv/cheekychuck` and `/opt/cheekychuck`, restarts the `cheekychuck` unit, checks `http://127.0.0.1:8095/health`, and installs and reloads the Caddy site. It ends with `Deployed: https://cheekychuck.jocogiant.com`.
+
+Smoke test: `curl https://cheekychuck.jocogiant.com/api/gallery`. Production e2e: `E2E_BASE_URL=https://cheekychuck.jocogiant.com npm run e2e`.
+
+## Moderation
+
+On the box, hide a photo and delete its file (`<id>` is the photos row id):
+
+```
+sqlite3 /var/lib/cheekychuck/cheekychuck.db "UPDATE photos SET hidden=1 WHERE id=<id>"
+rm /var/lib/cheekychuck/photos/<id>.jpg
+```
+
+## Logs
+
+`journalctl -u cheekychuck` (add `-f` to follow). Caddy: `journalctl -u caddy`.
