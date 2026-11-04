@@ -2,6 +2,7 @@ import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {existsSync,rmSync} from 'node:fs';
 import {join} from 'node:path';
+import {inspect} from 'node:util';
 import {makeApp,post,register} from './helpers.mjs';
 import {hashEmail,unsubscribeToken,emailFromToken} from '../server/photos.mjs';
 
@@ -37,6 +38,22 @@ test('rejects bad bodies',async()=>{
  const dead=await send(app,'bogus');assert.equal(dead.status,401);assert.equal((await dead.json()).signedOut,true);
  assert.equal(await count(db,'photos'),0);
  assert.equal((await send(app,token,{comment:'x'.repeat(90),lang:'xx'})).status,200);
+});
+
+test('address syntax nodemailer would re-parse is a 400',async()=>{
+ const {app,db,sent}=makeApp(),token=await register(app);
+ for(const to of ['x<victim@evil.com>','g:victim@evil.com;','victim@evil.com(c)','root,victim@evil.com','"v"@evil.com','v@evil','a b@evil.com',`${'a'.repeat(250)}@e.co`])
+  assert.equal((await send(app,token,{to})).status,400,to);
+ assert.equal(await count(db,'photos'),0);assert.equal(sent.length,0);
+});
+
+test('the address is lowercased before hashing and sending',async()=>{
+ const {app,db,sent}=makeApp(),token=await register(app);
+ assert.equal((await send(app,token,{to:'Bob@Example.COM'})).status,200);
+ assert.equal(sent[0].to,'bob@example.com');
+ assert.equal((await db.prepare('SELECT to_hash FROM mails').first()).to_hash,hashEmail('bob@example.com'));
+ assert.equal((await send(app,token,{to:'bob@example.com'})).status,200);
+ assert.equal((await send(app,token,{to:'BOB@example.com'})).status,429);
 });
 
 test('blocked recipient gets no mail but the photo stays',async()=>{
@@ -76,6 +93,16 @@ test('global cap',async()=>{
  const r=await send(app,token,{to:'cat@example.com'});
  assert.equal(r.status,503);assert.equal((await r.json()).error,'Photo sharing is busy right now. Please try again tomorrow.');
  assert.equal(await count(db,'photos'),1);
+});
+
+test('a failed mail logs no address',async(t)=>{
+ const err=t.mock.method(console,'error',()=>{});
+ const e=Object.assign(new Error("Can't send mail - all recipients were rejected: 550 5.1.1 <bob@example.com>: Recipient address rejected"),{code:'EENVELOPE',responseCode:550,rejected:['bob@example.com'],response:'550 5.1.1 <bob@example.com>'});
+ const {app}=makeApp({mailer:{send:async()=>{throw e;}}}),token=await register(app);
+ assert.equal((await send(app,token,{to:'Bob@example.com'})).status,502);
+ const logged=err.mock.calls.map(c=>inspect(c.arguments,{depth:9})).join('\n');
+ assert.ok(!/bob@/i.test(logged),logged);
+ assert.match(logged,/EENVELOPE/);assert.match(logged,/550/);assert.ok(logged.includes(hashEmail('bob@example.com').slice(0,8)));
 });
 
 test('smtp failure removes the photo',async(t)=>{

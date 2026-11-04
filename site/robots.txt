@@ -1,3 +1,4 @@
 User-agent: *
 Allow: /
+# /api/ is disallowed on purpose: player comments are not for indexing.
 Disallow: /api/

@@ -23,8 +23,12 @@ export function buildMail({lang,comment,id,publicUrl,unsubscribeUrl}){
 // Dev mode: print the mail instead of sending it.
 export const logMailer=()=>({async send({to,subject,url}){console.log(`[mail] to=${hashEmail(to).slice(0,8)} subject=${subject} link=${url}`);}});
 
+// Box-local Postfix on 127.0.0.1:25 needs neither auth nor TLS; an authenticated relay (SMTP_USER set) gets both.
+// Timeouts stay under the game's 60 s request timeout, so a slow send fails instead of arriving after the player retried.
 export function smtpMailer(env){
  if(!env.SMTP_HOST)return logMailer();
- const transport=nodemailer.createTransport({host:env.SMTP_HOST,port:Number(env.SMTP_PORT||587),secure:false,requireTLS:true,auth:{user:env.SMTP_USER,pass:env.SMTP_PASS}});
- return {send:({to,subject,text,html,headers})=>transport.sendMail({from:'Cheeky Chuck <contact@jocogiant.com>',to,subject,text,html,headers})};
+ const transport=nodemailer.createTransport({host:env.SMTP_HOST,port:Number(env.SMTP_PORT||587),secure:false,requireTLS:!!env.SMTP_USER,
+  ...(env.SMTP_USER?{auth:{user:env.SMTP_USER,pass:env.SMTP_PASS}}:{}),connectionTimeout:10000,greetingTimeout:10000,socketTimeout:15000});
+ // to as {name:'',address}: nodemailer sends the address as given, never parsing it for display names or more recipients.
+ return {send:({to,subject,text,html,headers})=>transport.sendMail({from:'Cheeky Chuck <contact@jocogiant.com>',to:{name:'',address:to},subject,text,html,headers})};
 }

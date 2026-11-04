@@ -1,5 +1,6 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
+import nodemailer from 'nodemailer';
 import {buildMail,smtpMailer} from '../server/mail.mjs';
 import {hashEmail} from '../server/photos.mjs';
 
@@ -36,6 +37,13 @@ test('smtpMailer without a host logs the mail',async t=>{
  assert.equal(log.mock.callCount(),1);assert.ok(log.mock.calls[0].arguments[0].includes(hashEmail('Bob@example.com').slice(0,8)));
 });
 
-test('smtpMailer with a host returns a sender',()=>{
- assert.equal(typeof smtpMailer({SMTP_HOST:'smtp.test',SMTP_USER:'u',SMTP_PASS:'p'}).send,'function');
+test('smtpMailer: relay with auth+TLS, local Postfix without, short timeouts, bare recipient address',async t=>{
+ const opts=[],mails=[];
+ t.mock.method(nodemailer,'createTransport',o=>{opts.push(o);return {sendMail:async m=>{mails.push(m);}};});
+ await smtpMailer({SMTP_HOST:'smtp.test',SMTP_USER:'u',SMTP_PASS:'p'}).send({to:'bob@example.com',subject:'S',text:'t',html:'h',headers:{}});
+ await smtpMailer({SMTP_HOST:'127.0.0.1',SMTP_PORT:'25'}).send({to:'bob@example.com',subject:'S',text:'t',html:'h',headers:{}});
+ const timeouts={connectionTimeout:10000,greetingTimeout:10000,socketTimeout:15000};
+ assert.deepEqual(opts[0],{host:'smtp.test',port:587,secure:false,requireTLS:true,auth:{user:'u',pass:'p'},...timeouts});
+ assert.deepEqual(opts[1],{host:'127.0.0.1',port:25,secure:false,requireTLS:false,...timeouts});
+ for(const m of mails){assert.deepEqual(m.to,{name:'',address:'bob@example.com'});assert.equal(m.from,'Cheeky Chuck <contact@jocogiant.com>');}
 });

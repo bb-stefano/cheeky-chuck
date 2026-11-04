@@ -4,8 +4,10 @@ import {writeFileSync,rmSync} from 'node:fs';
 import {join} from 'node:path';
 
 export const limits={perAccount:10,perRecipient:2,perIp:30};
-const DAY=86400e3,MAX_BYTES=2*1024*1024,EMAIL=/^[^\s@]+@[^\s@]+\.[^\s@]+$/,LANGS=['en','it','jp','zh'];
+const DAY=86400e3,MAX_BYTES=2*1024*1024,EMAIL=/^[A-Za-z0-9.!#$%&'*+/=?^_`{|}~-]+@[A-Za-z0-9-]+(\.[A-Za-z0-9-]+)+$/,LANGS=['en','it','jp','zh'];
 const fail=(status,error)=>Response.json({error},{status});
+// Mail errors carry the address (rejected:[...], '550 <addr>'): log only their code and a scrubbed, short message.
+const mailError=(e,to)=>({code:e?.code,responseCode:e?.responseCode,message:String(e?.message??'').replace(/\S*@\S*/g,'<email>').slice(0,80),to:hashEmail(to).slice(0,8)});
 
 export const hashEmail=email=>createHash('sha256').update(String(email).trim().toLowerCase()).digest('hex');
 const mac=(email,secret)=>createHmac('sha256',secret).update(email).digest('base64url');
@@ -35,8 +37,9 @@ function parse(body){
  if(bytes.length>MAX_BYTES)return 'The photo is too big.';
  if(bytes.length<3||bytes[0]!==0xFF||bytes[1]!==0xD8||bytes[2]!==0xFF)return 'The photo must be a JPEG.';
  if(typeof comment!=='string'||comment.length>90)return 'The comment is too long.';
- if(typeof to!=='string'||to.length>254||!EMAIL.test(to.trim()))return 'Please enter a valid email address.';
- return {bytes,comment,to:to.trim(),lang:LANGS.includes(lang)?lang:'en'};
+ const addr=typeof to==='string'?to.trim().toLowerCase():''; // strict addr-spec: nodemailer would parse 'x<a@b>', 'a@b,c' and the like as other recipients
+ if(addr.length>254||!EMAIL.test(addr))return 'Please enter a valid email address.';
+ return {bytes,comment,to:addr,lang:LANGS.includes(lang)?lang:'en'};
 }
 
 export async function postPhoto({db,body,session,ip,now,photosDir,mailer,env,buildMail}){
@@ -65,7 +68,7 @@ export async function postPhoto({db,body,session,ip,now,photosDir,mailer,env,bui
   const mail=buildMail({lang:v.lang,comment:v.comment,id,publicUrl:env.CC_PUBLIC_URL,unsubscribeUrl:`${env.CC_PUBLIC_URL}/api/unsubscribe?t=${unsubscribeToken(v.to,env.CC_SECRET)}`});
   await mailer.send({to:v.to,...mail,url});
  }catch(e){
-  console.error('photo mail failed',e);
+  console.error('photo mail failed',mailError(e,v.to));
   await undo();
   return fail(502,'Could not send the email. Please try again later.');
  }
@@ -97,11 +100,10 @@ export async function unsubscribe({db,url,env}){
 }
 
 // Account deletion: the rows first, so a stuck file never leaves them behind; then the files (failures are logged).
+// The mails rows stay: they hold only a recipient hash and a time, and are the per-recipient and global counters.
 export async function deleteAccountPhotos({db,photosDir,accountId}){
  const {results}=await db.prepare('SELECT id FROM photos WHERE account=?').bind(accountId).all();
- await db.batch([
-  db.prepare('DELETE FROM mails WHERE photo IN (SELECT id FROM photos WHERE account=?)').bind(accountId),
-  db.prepare('DELETE FROM photos WHERE account=?').bind(accountId)]);
+ await db.prepare('DELETE FROM photos WHERE account=?').bind(accountId).run();
  for(const {id} of results)
   try{rmSync(join(photosDir,`${id}.jpg`),{force:true});}catch(e){console.error('photo file removal failed',e);}
 }
