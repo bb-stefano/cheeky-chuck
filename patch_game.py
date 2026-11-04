@@ -139,6 +139,41 @@ fix_chain("screenshotview.lua",
     "    L0_3 = L4_2\n    L0_3.screenshotImg = nil\n    L0_3 = L4_2\n    L0_3.photoFrameImg = nil\n"
     "    if L4_2.offlineOkBtn then L4_2.offlineOkBtn:removeSelf(); L4_2.offlineOkBtn = nil end\n  end\n")
 
+# Settings -> Accounts tab: the 2012 accounts web page is replaced by the native account screen
+# (accountview.lua). Native views can't be layered under a web popup, so close the settings page while
+# the account screen is up and reopen it when the player leaves.
+fix_chain("confview.lua",
+    "  function L9_2()\n    local L0_3, L1_3, L2_3\n    L0_3 = platformIsAndroid\n    if L0_3 then\n      L0_3 = L5_2\n      L1_3 = L0_3\n      L0_3 = L0_3.showBrowser\n      L2_3 = L3_1\n      L0_3(L1_3, L2_3)\n    else\n      L0_3 = L5_2\n      L1_3 = L0_3\n      L0_3 = L0_3.showBrowser\n      L2_3 = L2_1\n      L0_3(L1_3, L2_3)\n    end\n  end\n",
+    "  function L9_2()\n    native.cancelWebPopup()\n"
+    "    require(\"accountview\").show({ onDone = function() L5_2:showBrowser(platformIsAndroid and L1_1 or L0_1) end })\n  end\n")
+
+# Strings for the account screen and photo sending (ids 300-320). Module-style file: append at EOF.
+ACCOUNT_STRINGS = [
+    ("UI_ACCOUNT_TITLE", 300, "Account", "Account", "アカウント", "账户"),
+    ("UI_EMAIL", 301, "Email", "Email", "メールアドレス", "电子邮件"),
+    ("UI_PASSWORD", 302, "Password", "Password", "パスワード", "密码"),
+    ("UI_REGISTER", 303, "Register", "Registrati", "登録", "注册"),
+    ("UI_LOGIN", 304, "Log in", "Accedi", "ログイン", "登录"),
+    ("UI_LOGOUT", 305, "Log out", "Esci", "ログアウト", "退出登录"),
+    ("UI_DELETE_ACCOUNT", 306, "Delete account", "Elimina account", "アカウント削除", "删除账户"),
+    ("UI_SIGNED_IN_AS", 307, "Signed in as", "Accesso eseguito come", "ログイン中のアカウント", "已登录账户"),
+    ("UI_FRIEND_EMAIL", 308, "Friend's email", "Email dell'amico", "友達のメールアドレス", "好友的电子邮件"),
+    ("UI_SEND", 309, "Send", "Invia", "送信", "发送"),
+    ("UI_PHOTO_SENT", 310, "Photo sent!", "Foto inviata!", "写真を送信しました！", "照片已发送！"),
+    ("ERR_NETWORK", 311, "Cannot reach the server. Check your connection.",
+        "Impossibile contattare il server. Controlla la connessione.",
+        "サーバーに接続できません。接続を確認してください。", "无法连接服务器，请检查网络连接。"),
+    ("UI_CLOSE", 312, "Close", "Chiudi", "閉じる", "关闭"),
+    ("UI_PASSWORD_CONFIRM", 313, "Password to confirm", "Password per confermare", "確認用パスワード", "输入密码以确认"),
+]
+loc = root / "localization.lua"
+s = loc.read_text(encoding="utf-8")
+assert "UI_ACCOUNT_TITLE" not in s
+s += "\n-- account / photo-sharing strings (patch_game.py)\n" + "".join(
+    f'{k} = {i}\nLOCALIZED_MSG[{k}] = {{ en = "{en}", it = "{it}", jp = "{jp}", zh = "{zh}" }}\n'
+    for k, i, en, it, jp, zh in ACCOUNT_STRINGS)
+loc.write_text(s, encoding="utf-8")
+
 main = root / "main.lua"
 s = main.read_text(encoding="utf-8")
 if 'require("compat")' not in s:

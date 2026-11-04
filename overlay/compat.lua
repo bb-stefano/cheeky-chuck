@@ -2,7 +2,8 @@
 -- Loaded first by main.lua. Keeps the decompiled game code untouched where possible.
 -- Deliberate ceilings are marked "ponytail:".
 compat = {}
-if ONLINE_ENABLED == nil then ONLINE_ENABLED = false end -- dead backend; flip when a server exists again
+ONLINE_ENABLED = true -- accounts + photo sharing against our own service (server/)
+API_BASE = system.getInfo("environment") == "simulator" and "http://127.0.0.1:8095" or "https://cheekychuck.jocogiant.com"
 TOUCH_DEBUG = true -- ponytail: gesture log to console while we chase input bugs; set false for release
 
 display.setDefault("isAnchorClamped", false)
@@ -144,8 +145,9 @@ do
   end
 end
 
--- Offline mode: the 2012 backend (api.cheekychuck.com) is gone. Hooks stay; requests fail fast.
-if not ONLINE_ENABLED then
+-- The 2012 backend (api.cheekychuck.com) is gone. Its legacy hooks stay; requests to it fail fast,
+-- whatever ONLINE_ENABLED says (the new flow uses account.lua / network.request against API_BASE).
+do
   -- Web popups are local HTML (html/): settings and the photo-comment page still work offline; only the
   -- account pages (*accounts*.html) talked to the backend, so those become an alert.
   -- v2 treats "html/x.html?cid=.." + baseUrl as a remote URL (the query string defeats the file lookup),
@@ -171,7 +173,9 @@ if not ONLINE_ENABLED then
     return showWebPopup(unpack(a, 1, select("#", ...)))
   end
   local ok, http = pcall(require, "socket.http")
-  if ok and http then http.request = function() return nil, "offline (compat.lua ONLINE_ENABLED=false)" end end
+  if ok and http then http.request = function() return nil, "offline (legacy backend gone)" end end
+end
+if not ONLINE_ENABLED then
   if network then
     network.request = function(url, method, listener)
       if type(listener) == "function" then

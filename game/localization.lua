@@ -148,3 +148,33 @@ function L0_1(A0_2, A1_2)
 end
 
 getLocalizedMsgWithPlaceholders = L0_1
+
+-- account / photo-sharing strings (patch_game.py)
+UI_ACCOUNT_TITLE = 300
+LOCALIZED_MSG[UI_ACCOUNT_TITLE] = { en = "Account", it = "Account", jp = "アカウント", zh = "账户" }
+UI_EMAIL = 301
+LOCALIZED_MSG[UI_EMAIL] = { en = "Email", it = "Email", jp = "メールアドレス", zh = "电子邮件" }
+UI_PASSWORD = 302
+LOCALIZED_MSG[UI_PASSWORD] = { en = "Password", it = "Password", jp = "パスワード", zh = "密码" }
+UI_REGISTER = 303
+LOCALIZED_MSG[UI_REGISTER] = { en = "Register", it = "Registrati", jp = "登録", zh = "注册" }
+UI_LOGIN = 304
+LOCALIZED_MSG[UI_LOGIN] = { en = "Log in", it = "Accedi", jp = "ログイン", zh = "登录" }
+UI_LOGOUT = 305
+LOCALIZED_MSG[UI_LOGOUT] = { en = "Log out", it = "Esci", jp = "ログアウト", zh = "退出登录" }
+UI_DELETE_ACCOUNT = 306
+LOCALIZED_MSG[UI_DELETE_ACCOUNT] = { en = "Delete account", it = "Elimina account", jp = "アカウント削除", zh = "删除账户" }
+UI_SIGNED_IN_AS = 307
+LOCALIZED_MSG[UI_SIGNED_IN_AS] = { en = "Signed in as", it = "Accesso eseguito come", jp = "ログイン中のアカウント", zh = "已登录账户" }
+UI_FRIEND_EMAIL = 308
+LOCALIZED_MSG[UI_FRIEND_EMAIL] = { en = "Friend's email", it = "Email dell'amico", jp = "友達のメールアドレス", zh = "好友的电子邮件" }
+UI_SEND = 309
+LOCALIZED_MSG[UI_SEND] = { en = "Send", it = "Invia", jp = "送信", zh = "发送" }
+UI_PHOTO_SENT = 310
+LOCALIZED_MSG[UI_PHOTO_SENT] = { en = "Photo sent!", it = "Foto inviata!", jp = "写真を送信しました！", zh = "照片已发送！" }
+ERR_NETWORK = 311
+LOCALIZED_MSG[ERR_NETWORK] = { en = "Cannot reach the server. Check your connection.", it = "Impossibile contattare il server. Controlla la connessione.", jp = "サーバーに接続できません。接続を確認してください。", zh = "无法连接服务器，请检查网络连接。" }
+UI_CLOSE = 312
+LOCALIZED_MSG[UI_CLOSE] = { en = "Close", it = "Chiudi", jp = "閉じる", zh = "关闭" }
+UI_PASSWORD_CONFIRM = 313
+LOCALIZED_MSG[UI_PASSWORD_CONFIRM] = { en = "Password to confirm", it = "Password per confermare", jp = "確認用パスワード", zh = "输入密码以确认" }
