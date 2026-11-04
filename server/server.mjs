@@ -10,7 +10,10 @@ import {openD1} from './sqlite-d1.mjs';
 import {createApp} from './app.mjs';
 
 const env=process.env,HERE=dirname(fileURLToPath(import.meta.url));
-const app=createApp({db:openD1(env.CC_DB||'cheekychuck.db',join(HERE,'migrations')),photosDir:env.CC_PHOTOS||'./photos',mailer:null,env});
+// Placeholder until the SMTP mailer lands: print the mail instead of sending it.
+const mailer={async send({to,subject,text}){console.log(`[mail] to=${to} subject=${subject}
+${text}`);}};
+const app=createApp({db:openD1(env.CC_DB||'cheekychuck.db',join(HERE,'migrations')),photosDir:env.CC_PHOTOS||'./photos',mailer,env});
 
 async function body(req,max=4*1024*1024){let size=0;const parts=[];for await(const part of req){size+=part.length;if(size>max)throw Object.assign(Error('too large'),{status:413});parts.push(part);}return Buffer.concat(parts);}
 
