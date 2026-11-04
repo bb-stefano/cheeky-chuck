@@ -1,0 +1,69 @@
+/* Cheeky Chuck on jocogiant.com: the Joco Giant night sky, with Chuck's orange as the accent. Shared by / and /gallery. */
+@font-face{font-family:'Bubble Rounded';src:url(/assets/bubble-rounded.ttf) format('truetype');font-display:swap}
+@font-face{font-family:'Bubble Slim';src:url(/assets/bubble-slim.ttf) format('truetype');font-display:swap}
+:root{--night:#141a3d;--night2:#1f2d6b;--teal:#2bd4c4;--gold:#ffc94a;--ink:#0b0f26;--text:#eef1ff;--muted:#b9c0e8;--chuck:#f28a1a}
+*{box-sizing:border-box}
+body{margin:0;color:var(--text);background:var(--ink);font:18px/1.55 'Bubble Slim',ui-rounded,'Segoe UI',system-ui,sans-serif;overflow-x:hidden}
+h1,h2,h3,.btn,.badge{font-family:'Bubble Rounded',ui-rounded,system-ui,sans-serif;font-weight:400;letter-spacing:.5px}
+a{color:inherit}
+a:focus-visible,button:focus-visible{outline:3px solid #fff;outline-offset:3px}
+
+.hero{position:relative;display:grid;place-items:center;text-align:center;padding:56px 16px 150px;overflow:hidden;
+ background:radial-gradient(circle at 50% 38%,#3b4fa8 0,transparent 42%),linear-gradient(var(--night) 0,var(--night2) 70%,#2a3a80 100%)}
+.hero.small{padding:28px 16px 90px}
+.stars,.stars::before,.stars::after{position:absolute;inset:0;content:'';background-image:radial-gradient(2px 2px at 12% 18%,#fff 50%,transparent 51%),radial-gradient(2px 2px at 78% 12%,#fff 50%,transparent 51%),radial-gradient(1.5px 1.5px at 35% 30%,#fff 50%,transparent 51%),radial-gradient(1.5px 1.5px at 62% 24%,#fff 50%,transparent 51%),radial-gradient(2px 2px at 90% 40%,#fff 50%,transparent 51%),radial-gradient(1.5px 1.5px at 6% 46%,#fff 50%,transparent 51%);animation:twinkle 4s ease-in-out infinite alternate}
+.stars::before{transform:translate(9%,14%) scale(.9);animation-delay:-1.3s}.stars::after{transform:translate(-14%,6%) scale(1.1);animation-delay:-2.6s}
+@keyframes twinkle{from{opacity:.35}to{opacity:1}}
+.moon{position:absolute;width:130px;height:130px;border-radius:50%;background:#fff6d6;box-shadow:0 0 80px 30px rgba(255,236,170,.35);top:9%;right:10%}
+.hero-text{position:relative;z-index:2}
+.icon{display:block;margin:0 auto 14px;border-radius:26px;box-shadow:0 0 50px -6px var(--chuck)}
+.hero h1{margin:0;font-size:clamp(46px,9vw,84px);line-height:1;color:var(--chuck);text-shadow:0 6px 0 rgba(0,0,0,.35)}
+.hero.small h1{font-size:clamp(34px,6vw,54px)}
+.hero.small a{text-decoration:none}
+.tagline{margin:14px auto 0;max-width:560px;font-size:21px;color:var(--text)}
+.range{position:absolute;left:0;right:0;bottom:-2px;width:100%;height:140px;display:block}
+
+#stores{display:flex;flex-wrap:wrap;justify-content:center;gap:12px;margin:26px 0 0}
+.badge,.btn{display:inline-flex;flex-direction:column;align-items:flex-start;padding:10px 24px;border-radius:16px;background:#000;color:#fff;text-decoration:none;font-size:22px;line-height:1.1;border:2px solid var(--muted);transition:box-shadow .2s,transform .2s}
+.badge small{font:13px/1.3 'Bubble Slim',ui-rounded,system-ui,sans-serif;letter-spacing:.5px;color:var(--muted)}
+.btn{flex-direction:row;align-items:center;border-radius:99px;background:var(--chuck);border-color:var(--chuck);color:var(--ink);font-size:20px}
+.badge:hover,.btn:hover{box-shadow:0 0 28px 2px var(--chuck);transform:translateY(-2px)}
+.more{margin-top:18px}.more a{color:var(--gold)}
+
+main{max-width:1060px;margin:0 auto;padding:30px 16px 50px}
+h2{text-align:center;font-size:clamp(30px,5vw,44px);margin:0 0 24px;color:var(--gold)}
+section{margin:0 0 70px}
+.intro{max-width:760px;margin-left:auto;margin-right:auto;text-align:center}.intro p{font-size:21px;margin:0 0 16px}
+
+.shots{display:flex;gap:18px;overflow-x:auto;scroll-snap-type:x mandatory;padding:10px 4px 18px;margin:0;list-style:none}
+.shots li{flex:0 0 min(240px,70vw);scroll-snap-align:center}
+@media(min-width:900px){.shots li{flex:1 1 0}}
+.shots figure{margin:0}
+.shots img{display:block;width:100%;height:auto;border-radius:22px;border:6px solid #000;box-shadow:0 0 40px -12px var(--chuck)}
+.shots figcaption{margin-top:8px;text-align:center;font-size:15px;color:var(--muted)}
+
+.features{list-style:none;padding:0;margin:0 auto;max-width:860px;display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:14px}
+.features li{padding:16px 20px;border:2px solid var(--teal);border-radius:20px;box-shadow:0 0 22px -8px var(--teal)}
+.features strong{display:block;font:22px/1.2 'Bubble Rounded',ui-rounded,system-ui,sans-serif;color:var(--teal);margin-bottom:4px}
+.cta{text-align:center}.cta p{max-width:620px;margin:0 auto 22px;font-size:20px}
+
+/* Gallery: each photo sits in the game's frame art, centred, 81% of the frame's width, tilted like in the game. */
+.photos{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:28px 22px}
+.photos.single{grid-template-columns:minmax(0,480px);justify-content:center}
+.photo{margin:0}
+.frame{position:relative;aspect-ratio:788/808;background:url(/assets/photo_frame.png) center/100% 100% no-repeat}
+.frame img{position:absolute;left:50%;top:50%;width:81%;aspect-ratio:1;object-fit:cover;transform:translate(-50%,-50%) rotate(6.8deg);background:#ddd}
+.photo figcaption{margin-top:8px;text-align:center}
+.photo q{display:block;font-size:20px;overflow-wrap:anywhere}
+.photo time{display:block;font-size:15px;color:var(--muted)}
+#status{text-align:center;font-size:20px;color:var(--muted)}
+#status:empty{display:none}
+.center{text-align:center;margin-top:30px}
+button.btn{cursor:pointer;font-family:'Bubble Rounded',ui-rounded,system-ui,sans-serif}
+button.btn[hidden]{display:none}
+
+footer{text-align:center;padding:36px 16px 46px;font-size:15px;color:var(--muted);border-top:1px solid #222a5a}
+footer nav{display:flex;flex-wrap:wrap;justify-content:center;gap:8px 22px;margin-bottom:12px}
+footer a{color:var(--text)}
+@media(max-width:760px){.moon{width:80px;height:80px;right:6%}}
+@media(prefers-reduced-motion:reduce){.stars,.stars::before,.stars::after{animation:none}.badge,.btn{transition:none}}

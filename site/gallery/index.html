@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Cheeky Chuck – players' photo gallery</title>
+<meta name="description" content="Photos from Cheeky Chuck's room, snapped by players with the in-game camera.">
+<link rel="canonical" href="https://cheekychuck.jocogiant.com/gallery">
+<link rel="icon" href="/favicon.png" type="image/png">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Cheeky Chuck – players' photo gallery">
+<meta property="og:image" content="https://cheekychuck.jocogiant.com/assets/shot-5.png">
+<link rel="stylesheet" href="/site.css">
+<script src="/gallery.js" defer></script>
+</head>
+<body>
+<header class="hero small">
+  <div class="stars"></div><div class="moon"></div>
+  <div class="hero-text">
+    <a href="/"><img class="icon" src="/assets/icon.png" alt="" width="80" height="80"><h1>Cheeky Chuck</h1></a>
+    <p class="tagline">Players' photos from Chuck's room</p>
+  </div>
+  <svg class="range" viewBox="0 0 1440 220" preserveAspectRatio="none" aria-hidden="true">
+    <path fill="#24306b" d="M0 150 180 60 300 120 470 30 640 130 780 70 960 140 1120 50 1290 120 1440 70V220H0Z"/>
+    <path fill="#151c44" d="M0 190 140 120 260 170 420 100 560 175 720 115 880 180 1040 110 1210 170 1340 130 1440 160V220H0Z"/>
+    <path fill="var(--ink)" d="M0 210 220 175 480 205 760 170 1010 205 1260 178 1440 200V220H0Z"/>
+  </svg>
+</header>
+
+<main>
+  <div id="photos" class="photos"></div>
+  <p id="status" role="status">Loading photos…</p>
+  <noscript><p class="center">The gallery needs JavaScript to load the photos.</p></noscript>
+  <p class="center"><button id="more" class="btn" type="button" hidden>More photos</button></p>
+  <p class="center" id="back" hidden><a class="btn" href="/gallery">See all photos</a></p>
+</main>
+
+<footer>
+  <nav>
+    <a href="/">Cheeky Chuck</a>
+    <a href="https://jocogiant.com">More games from Joco Giant</a>
+    <a href="mailto:support@jocogiant.com">support@jocogiant.com</a>
+  </nav>
+  © 2012–2026 Joco Giant · EGGsist
+</footer>
+</body>
+</html>
