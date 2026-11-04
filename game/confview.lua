@@ -118,21 +118,8 @@ function L4_1(A0_2, A1_2, A2_2, A3_2, A4_2)
   end
   
   function L9_2()
-    local L0_3, L1_3, L2_3
-    L0_3 = platformIsAndroid
-    if L0_3 then
-      L0_3 = L5_2
-      L1_3 = L0_3
-      L0_3 = L0_3.showBrowser
-      L2_3 = L3_1
-      L0_3(L1_3, L2_3)
-    else
-      L0_3 = L5_2
-      L1_3 = L0_3
-      L0_3 = L0_3.showBrowser
-      L2_3 = L2_1
-      L0_3(L1_3, L2_3)
-    end
+    native.cancelWebPopup()
+    require("accountview").show({ onDone = function() L5_2:showBrowser(platformIsAndroid and L1_1 or L0_1) end })
   end
   
   function L10_2(A0_3)

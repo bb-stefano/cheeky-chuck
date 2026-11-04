@@ -10,3 +10,6 @@ touchcmd.txt
 dev/*.png
 node_modules/
 *.db
+dev-photos/
+*.db-shm
+*.db-wal
