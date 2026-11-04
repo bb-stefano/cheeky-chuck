@@ -39,9 +39,9 @@ rm -rf /srv/cheekychuck.new && cp -r "$R/site" /srv/cheekychuck.new && chmod -R 
 rm -rf /srv/cheekychuck.old && { [ -d /srv/cheekychuck ] && mv /srv/cheekychuck /srv/cheekychuck.old || true; }
 mv /srv/cheekychuck.new /srv/cheekychuck
 # The API: node:sqlite needs Node 22.13+ (dnf also upgrades c-ares, which Rocky's nodejs build needs).
-# Installed only when node is missing or older than v22: the box's other services share this Node, so never upgrade it here.
-v=$(node -v 2>/dev/null || true); major=${v#v}; major=${major%%.*}
-if [ -z "$major" ] || [ "$major" -lt 22 ]; then dnf install -y -q nodejs c-ares; fi
+# Installed only when node is missing or older than v22.13: the box's other services share this Node, so never upgrade it here.
+v=$(node -v 2>/dev/null || true); v=${v#v}; major=${v%%.*}; minor=${v#*.}; minor=${minor%%.*}
+if [ -z "$major" ] || [ "$major" -lt 22 ] || { [ "$major" -eq 22 ] && [ "${minor:-0}" -lt 13 ]; }; then dnf install -y -q nodejs c-ares; fi
 rm -rf /opt/cheekychuck.new && mkdir -p /opt/cheekychuck.new
 cp -r "$R/server" "$R/node_modules" "$R/package.json" "$R/package-lock.json" /opt/cheekychuck.new/
 chmod -R a+rX /opt/cheekychuck.new
