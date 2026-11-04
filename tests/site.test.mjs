@@ -3,6 +3,8 @@ import assert from 'node:assert/strict';
 import {readFileSync,mkdtempSync,writeFileSync} from 'node:fs';
 import {join} from 'node:path';
 import {tmpdir} from 'node:os';
+import {spawnSync} from 'node:child_process';
+import {fileURLToPath} from 'node:url';
 import {serveStatic} from '../server/static.mjs';
 
 const SITE=new URL('../site/',import.meta.url);
@@ -45,4 +47,12 @@ test('serveStatic maps the Caddy routes and refuses traversal',()=>{
  assert.equal(s('/nope.html').status,404);
  for(const p of ['/../package.json','/..%2fpackage.json','/%2e%2e/package.json','/assets/../../package.json'])assert.equal(s(p).status,404,p);
  assert.equal(s('/api/gallery'),null);
+});
+
+test('server refuses to start without CC_SECRET or CC_PUBLIC_URL',()=>{
+ const run=extra=>spawnSync(process.execPath,[fileURLToPath(new URL('../server/server.mjs',import.meta.url))],{env:{PATH:process.env.PATH,CC_DB:':memory:',...extra},encoding:'utf8',timeout:10000});
+ for(const [extra,name] of [[{CC_PUBLIC_URL:'https://cc.test'},'CC_SECRET'],[{CC_SECRET:'s',CC_PUBLIC_URL:''},'CC_PUBLIC_URL']]){
+  const r=run(extra);
+  assert.equal(r.status,1);assert.match(r.stderr,new RegExp(`${name} must be set, refusing to start`));
+ }
 });

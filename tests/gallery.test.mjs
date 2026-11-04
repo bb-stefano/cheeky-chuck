@@ -61,9 +61,18 @@ test('delete removes photos',async()=>{
  assert.equal((await r.json()).deleted,true);
  assert.ok(!existsSync(join(photosDir,`${id}.jpg`)));
  assert.equal((await get(app,`/api/gallery?id=${id}`)).status,404);
- assert.equal(await db.prepare('SELECT 1 AS x FROM mails WHERE photo=?').bind(id).first(),null);
+ assert.ok(await db.prepare('SELECT 1 AS x FROM mails WHERE photo=?').bind(id).first()); // the abuse ledger survives
  assert.ok(existsSync(join(photosDir,`${keep}.jpg`)));
  assert.equal((await get(app,`/api/gallery?id=${keep}`)).status,200);
+});
+
+test('delete and re-register keeps the recipient limit',async()=>{
+ const {app,db}=makeApp(),token=await register(app);
+ for(const ip of ['4.4.4.1','4.4.4.2'])assert.equal((await send(app,token,{},{ip})).status,200);
+ assert.equal((await (await post(app,'/api/account',{action:'delete',password:'eightchars'},{token})).json()).deleted,true);
+ assert.equal((await db.prepare('SELECT count(*) AS n FROM mails WHERE to_hash=?').bind(hashEmail('bob@example.com')).first()).n,2);
+ const again=await register(app);
+ assert.equal((await send(app,again,{},{ip:'4.4.4.3'})).status,429);
 });
 
 test('delete with only the cookie removes photos',async()=>{

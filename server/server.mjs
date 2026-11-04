@@ -14,6 +14,9 @@ import {smtpMailer} from './mail.mjs';
 import {serveStatic} from './static.mjs';
 
 const env=process.env,HERE=dirname(fileURLToPath(import.meta.url));
+// Production needs a real secret (unsubscribe links) and public URL (mail links); dev static mode gets a dev secret.
+if(env.CC_SITE)env.CC_SECRET||='dev-secret';
+else{const missing=['CC_SECRET','CC_PUBLIC_URL'].filter(k=>!env[k]);if(missing.length){console.error(`Cheeky Chuck API: ${missing.join(' and ')} must be set, refusing to start.`);process.exit(1);}}
 const app=createApp({db:openD1(env.CC_DB||'cheekychuck.db',join(HERE,'migrations')),photosDir:env.CC_PHOTOS||'./photos',mailer:smtpMailer(env),env});
 
 async function body(req,max=4*1024*1024){let size=0;const parts=[];for await(const part of req){size+=part.length;if(size>max)throw Object.assign(Error('too large'),{status:413});parts.push(part);}return Buffer.concat(parts);}

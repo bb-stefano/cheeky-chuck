@@ -13,13 +13,13 @@ CC_SECRET=<long random string, e.g. openssl rand -hex 32>
 CC_APP_ORIGINS=app://cheekychuck
 CC_PUBLIC_URL=https://cheekychuck.jocogiant.com
 CC_MAX_MAILS_PER_DAY=200
-SMTP_HOST=smtp.example.com
-SMTP_PORT=587
-SMTP_USER=contact@jocogiant.com
-SMTP_PASS=<smtp password>
+SMTP_HOST=127.0.0.1
+SMTP_PORT=25
 ```
 
-`deploy.sh` refuses to copy or install anything until all of these keys are present.
+Optional, only for an authenticated relay (then the connection also requires STARTTLS): `SMTP_USER=contact@jocogiant.com`, `SMTP_PASS=<smtp password>`.
+
+`deploy.sh` refuses to copy or install anything until every key above (not the optional two) has a non-empty value.
 
 ## 2. DNS (once)
 
@@ -34,6 +34,16 @@ bash deploy/deploy.sh
 It checks the env file on the box, runs `npm test`, installs production-only `node_modules` in a temp dir (your local `node_modules` is untouched), uploads, swaps `/srv/cheekychuck` and `/opt/cheekychuck`, restarts the `cheekychuck` unit, checks `http://127.0.0.1:8095/health`, and installs and reloads the Caddy site. It ends with `Deployed: https://cheekychuck.jocogiant.com`.
 
 Smoke test: `curl https://cheekychuck.jocogiant.com/api/gallery`. Production e2e: `E2E_BASE_URL=https://cheekychuck.jocogiant.com npm run e2e`.
+
+## Mail
+
+The API hands mail to Postfix on the box (`127.0.0.1:25`, no auth, no TLS), which signs it with OpenDKIM and delivers it directly. Needed once, outside this repo:
+
+- Postfix + OpenDKIM installed and running on the box.
+- Outbound port 25 unblocked by Hetzner (blocked by default on new accounts; ask support).
+- PTR (reverse DNS) of `135.181.204.213` set to `cheekychuck.jocogiant.com` (Hetzner console).
+- SPF for jocogiant.com includes `ip4:135.181.204.213`.
+- DKIM: the selector `cc` TXT record (`cc._domainkey.jocogiant.com`) published from the key in `/etc/opendkim/keys`.
 
 ## Moderation
 
