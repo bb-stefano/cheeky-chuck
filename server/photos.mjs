@@ -4,7 +4,7 @@ import {writeFileSync,rmSync} from 'node:fs';
 import {join} from 'node:path';
 
 export const limits={perAccount:10,perRecipient:2,perIp:30};
-const DAY=86400e3,MAX_BYTES=2*1024*1024,EMAIL=/^[A-Za-z0-9.!#$%&'*+/=?^_`{|}~-]+@[A-Za-z0-9-]+(\.[A-Za-z0-9-]+)+$/,LANGS=['en','it','jp','zh'];
+const DAY=86400e3,MAX_BYTES=2*1024*1024,EMAIL=/^[A-Za-z0-9.#$&'*+/=?^_`{|}~-]+@[A-Za-z0-9-]+(\.[A-Za-z0-9-]+)+$/,LANGS=['en','it','jp','zh'];
 const fail=(status,error)=>Response.json({error},{status});
 // Mail errors carry the address (rejected:[...], '550 <addr>'): log only their code and a scrubbed, short message.
 const mailError=(e,to)=>({code:e?.code,responseCode:e?.responseCode,message:String(e?.message??'').replace(/\S*@\S*/g,'<email>').slice(0,80),to:hashEmail(to).slice(0,8)});
