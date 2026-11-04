@@ -6,15 +6,19 @@ import {mkdtempSync,mkdirSync,readFileSync,rmSync} from 'node:fs';
 import {tmpdir} from 'node:os';
 import {join,dirname} from 'node:path';
 import {fileURLToPath} from 'node:url';
+import {createServer} from 'node:net';
 import assert from 'node:assert/strict';
 import {chromium} from 'playwright-core';
 
 const ROOT=join(dirname(fileURLToPath(import.meta.url)),'..','..');
-const PORT=8096,remote=process.env.E2E_BASE_URL;
-const base=(remote||`http://127.0.0.1:${PORT}`).replace(/\/$/,'');
+const remote=process.env.E2E_BASE_URL;
+let base=(remote||'').replace(/\/$/,'');
 let server,tmp,browser,checks=0;
 
+const freePort=()=>new Promise((res,rej)=>{const s=createServer().once('error',rej).listen(0,'127.0.0.1',()=>{const {port}=s.address();s.close(()=>res(port));});});
+
 async function startServer(){
+ const PORT=await freePort();base=`http://127.0.0.1:${PORT}`;
  tmp=mkdtempSync(join(tmpdir(),'cc-e2e-'));mkdirSync(join(tmp,'photos'));
  server=spawn(process.execPath,['server/server.mjs'],{cwd:ROOT,stdio:['ignore','inherit','inherit'],env:{...process.env,
   CC_DB:join(tmp,'cc.db'),CC_PHOTOS:join(tmp,'photos'),CC_SECRET:'e2e-secret',CC_APP_ORIGINS:'app://cheekychuck',
