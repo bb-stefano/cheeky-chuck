@@ -96,11 +96,12 @@ export async function unsubscribe({db,url,env}){
  return new Response(`<!doctype html><meta charset="utf-8"><title>Cheeky Chuck</title><p>You won't get Cheeky Chuck photos again.</p>`,{headers:{'Content-Type':'text/html; charset=utf-8','Cache-Control':'no-store'}});
 }
 
-// Account deletion: the photo files, then their mails and rows.
+// Account deletion: the rows first, so a stuck file never leaves them behind; then the files (failures are logged).
 export async function deleteAccountPhotos({db,photosDir,accountId}){
  const {results}=await db.prepare('SELECT id FROM photos WHERE account=?').bind(accountId).all();
- for(const {id} of results)rmSync(join(photosDir,`${id}.jpg`),{force:true});
  await db.batch([
   db.prepare('DELETE FROM mails WHERE photo IN (SELECT id FROM photos WHERE account=?)').bind(accountId),
   db.prepare('DELETE FROM photos WHERE account=?').bind(accountId)]);
+ for(const {id} of results)
+  try{rmSync(join(photosDir,`${id}.jpg`),{force:true});}catch(e){console.error('photo file removal failed',e);}
 }

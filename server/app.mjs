@@ -10,9 +10,9 @@ const sha=s=>createHash('sha256').update(s).digest('hex');
 export function createApp({db,photosDir,mailer,env}){
  const appOrigins=(env.CC_APP_ORIGINS||'').split(',').filter(Boolean);
  async function handle(req,ip){
-  // Same session lookup as accounts.mjs: sha256 of the token, valid for a year.
+  // Same session lookup as accounts.mjs: the cc_account cookie first, else the header; sha256 of the token, valid for a year.
   const sessionOf=async r=>{
-   const token=r.headers.get('x-account-token');
+   const token=(r.headers.get('cookie')||'').match(/(?:^|;\s*)cc_account=([^;]+)/)?.[1]||r.headers.get('x-account-token');
    return token?db.prepare('SELECT a.id, a.email FROM account_sessions s JOIN accounts a ON a.id=s.account WHERE s.secret=? AND s.created>?').bind(sha(token),Date.now()-365*86400e3).first():null;
   };
   const path=new URL(req.url).pathname;

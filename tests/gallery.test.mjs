@@ -65,3 +65,11 @@ test('delete removes photos',async()=>{
  assert.ok(existsSync(join(photosDir,`${keep}.jpg`)));
  assert.equal((await get(app,`/api/gallery?id=${keep}`)).status,200);
 });
+
+test('delete with only the cookie removes photos',async()=>{
+ const {app,db,photosDir}=makeApp(),token=await register(app),[id]=await fill(app,token,1);
+ const r=await app.handle(new Request('http://x/api/account',{method:'POST',headers:{'Content-Type':'application/json',Origin:'http://x',Cookie:`theme=dark; cc_account=${token}`},body:JSON.stringify({action:'delete',password:'eightchars'})}),'1.1.1.1');
+ assert.equal((await r.json()).deleted,true);
+ assert.ok(!existsSync(join(photosDir,`${id}.jpg`)));
+ assert.equal(await db.prepare('SELECT 1 AS x FROM photos WHERE id=?').bind(id).first(),null);
+});
