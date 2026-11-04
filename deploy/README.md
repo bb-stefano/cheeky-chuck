@@ -37,10 +37,10 @@ Smoke test: `curl https://cheekychuck.jocogiant.com/api/gallery`. Production e2e
 
 ## Moderation
 
-On the box, hide a photo and delete its file (`<id>` is the photos row id):
+On the box, hide a photo and delete its file (`<id>` is the photos row id). Run sqlite3 as the service user so root never creates root-owned `-wal`/`-shm` files next to the db (the `sqlite3` CLI may need `dnf install -y sqlite`):
 
 ```
-sqlite3 /var/lib/cheekychuck/cheekychuck.db "UPDATE photos SET hidden=1 WHERE id=<id>"
+sudo -u caddy sqlite3 /var/lib/cheekychuck/cheekychuck.db "UPDATE photos SET hidden=1 WHERE id=<id>"
 rm /var/lib/cheekychuck/photos/<id>.jpg
 ```
 
