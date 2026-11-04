@@ -41,13 +41,16 @@ mv /srv/cheekychuck.new /srv/cheekychuck
 dnf install -y -q nodejs c-ares
 rm -rf /opt/cheekychuck.new && mkdir -p /opt/cheekychuck.new
 cp -r "$R/server" "$R/node_modules" "$R/package.json" "$R/package-lock.json" /opt/cheekychuck.new/
+chmod -R a+rX /opt/cheekychuck.new
 rm -rf /opt/cheekychuck.old && { [ -d /opt/cheekychuck ] && mv /opt/cheekychuck /opt/cheekychuck.old || true; }
 mv /opt/cheekychuck.new /opt/cheekychuck
 install -d -m 750 -o caddy -g caddy /var/lib/cheekychuck /var/lib/cheekychuck/photos
 install -m 644 "$R/deploy/cheekychuck.service" /etc/systemd/system/
 systemctl daemon-reload && systemctl enable -q cheekychuck && systemctl restart cheekychuck
-for i in 1 2 3 4 5; do curl -fsS http://127.0.0.1:8095/health && break || sleep 1; done
+ok=0
+for i in 1 2 3 4 5; do curl -fsS http://127.0.0.1:8095/health && { ok=1; break; } || sleep 1; done
 echo
+[ "$ok" = 1 ] || { journalctl -u cheekychuck -n 30 --no-pager; exit 1; }
 install -m 644 "$R/deploy/cheekychuck.caddy" /etc/caddy/sites/cheekychuck.caddy
 caddy validate --adapter caddyfile --config /etc/caddy/Caddyfile >/dev/null
 systemctl reload caddy
