@@ -468,6 +468,10 @@ function L11_1(A0_2, A1_2, A2_2, A3_2)
   
   function L12_2(A0_3)
     local L1_3, L2_3, L3_3, L4_3, L5_3, L6_3, L7_3, L8_3, L9_3, L10_3
+    if ONLINE_ENABLED then
+      require("photosend").show({ onSent = function() L7_2(); L8_2() end, onCancel = function() L11_2({ url = "postmsg:cancel" }) end })
+      return
+    end
     if not ONLINE_ENABLED then
       local btn = ui.newButton({ default = HTML_DIR .. "im/ok.png", over = HTML_DIR .. "im/ok.png",
         onRelease = function() timer.performWithDelay(1, function() L11_2({ url = "postmsg:cancel" }) end) end })

@@ -34,7 +34,7 @@ test('rejects bad bodies',async()=>{
  assert.equal((await send(app,token,{comment:'x'.repeat(91)})).status,400);
  assert.equal((await send(app,token,{to:'nope'})).status,400);
  assert.equal((await send(app,undefined)).status,401);
- assert.equal((await send(app,'bogus')).status,401);
+ const dead=await send(app,'bogus');assert.equal(dead.status,401);assert.equal((await dead.json()).signedOut,true);
  assert.equal(await count(db,'photos'),0);
  assert.equal((await send(app,token,{comment:'x'.repeat(90),lang:'xx'})).status,200);
 });

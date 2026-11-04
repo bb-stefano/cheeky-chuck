@@ -40,7 +40,7 @@ function parse(body){
 }
 
 export async function postPhoto({db,body,session,ip,now,photosDir,mailer,env,buildMail}){
- if(!session)return fail(401,'Please sign in again.');
+ if(!session)return Response.json({error:'Please sign in again.',signedOut:true},{status:401}); // signedOut: the game drops its token, as for /api/account
  const v=parse(body);
  if(typeof v==='string')return fail(400,v);
  const since=now-DAY;

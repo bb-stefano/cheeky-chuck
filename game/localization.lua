@@ -178,3 +178,5 @@ UI_CLOSE = 312
 LOCALIZED_MSG[UI_CLOSE] = { en = "Close", it = "Chiudi", jp = "閉じる", zh = "关闭" }
 UI_PASSWORD_CONFIRM = 313
 LOCALIZED_MSG[UI_PASSWORD_CONFIRM] = { en = "Password to confirm", it = "Password per confermare", jp = "確認用パスワード", zh = "输入密码以确认" }
+UI_COMMENT = 314
+LOCALIZED_MSG[UI_COMMENT] = { en = "Tap to write a comment", it = "Tocca qui per inserire un commento", jp = "コメントを書込む", zh = "点此处给出评论" }
