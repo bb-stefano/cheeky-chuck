@@ -135,6 +135,20 @@ test('smtp failure removes the photo', …) // mailer throws → 502, no row, no
 - [ ] **Step 4: Run `npm test`; open `site/index.html` and `site/gallery/index.html?id=1` through a local run (`CC_DB=dev.db CC_PHOTOS=dev-photos SMTP_HOST= node server/server.mjs` plus `python -m http.server` is not enough for `/api`, so add `npm run dev`: `server.mjs` serves `site/` and `/photos/` itself when `CC_SITE` is set, mirroring the Caddy routes)** — expected: pages render, one photo view works after a `curl` upload.
 - [ ] **Step 5: Commit** `git add site tests/site.test.mjs server/server.mjs package.json && git commit -m "site: landing page and gallery"`.
 
+### Task 5b: Playwright end-to-end check of the site
+
+**Files:**
+- Create: `tests/e2e/site.e2e.mjs`, `package.json` script `"e2e": "node tests/e2e/site.e2e.mjs"`
+- Dev deps: `playwright-core` (devDependency; browser channel `msedge`, already installed on this machine; never bundled in the deploy, which runs `npm ci --omit=dev`)
+
+**Interfaces:**
+- Consumes: Task 5's `npm run dev` (server serving `site/` + `/api` + `/photos/` on `http://127.0.0.1:8095`, env `CC_SITE=site`), Task 2's `/api/photo`.
+- `site.e2e.mjs`: starts the server as a child process with a temp `CC_DB`/`CC_PHOTOS` and `SMTP_HOST=` (log mailer), registers an account and posts two photos with `fetch` (comments `first` and `second`), then with Playwright (`chromium.launch({channel:'msedge', headless:true})`): (1) `/` has title starting `Cheeky Chuck`, the five screenshots load (`naturalWidth > 0`), the gallery link navigates to `/gallery`; (2) `/gallery` shows two figures, `second` before `first`, images load; (3) `/gallery?id=<first id>` shows exactly one figure with comment `first` and a "See all photos" link; (4) `/gallery?id=999` shows a not-found message. Exits non-zero on any failure; kills the server in `finally`. `E2E_BASE_URL` env overrides the base URL to run the browser steps against production after deploy (then it skips the upload setup and only checks `/`, `/gallery` renders and `?id=999`).
+
+- [ ] **Step 1: Write the script; `npm install -D playwright-core`.**
+- [ ] **Step 2: Run `npm run e2e`** — expected: `PASS: site e2e (4 checks)` and exit 0.
+- [ ] **Step 3: Commit** `git add tests/e2e package.json package-lock.json && git commit -m "site: playwright end-to-end check"`.
+
 ### Task 6: Deploy
 
 **Files:**
@@ -181,5 +195,6 @@ test('smtp failure removes the photo', …) // mailer throws → 502, no row, no
 
 - [ ] **Step 1: Owner items: DNS A record, `/etc/cheekychuck.env` on the box (README lists the keys). Stop here until both exist.**
 - [ ] **Step 2: `bash deploy/deploy.sh`** — expected the `Deployed:` line; `curl https://cheekychuck.jocogiant.com/health` is not proxied (only `/api/*`), so check `curl -s https://cheekychuck.jocogiant.com/api/gallery` → `[]` and the landing page in a browser.
+- [ ] **Step 2b: `E2E_BASE_URL=https://cheekychuck.jocogiant.com npm run e2e`** — expected PASS against production.
 - [ ] **Step 3: One real send from the simulator with `API_BASE` temporarily pointed at production (set `CC_API_OVERRIDE` in `compat.lua` dev section), to the owner's own address; confirm the mail arrives (not in spam) and the gallery link shows the photo. Then revert the override.**
 - [ ] **Step 4: Update memory notes (`cheekychuck-revival.md`: service, ports, env keys, deploy) and commit/push.**
