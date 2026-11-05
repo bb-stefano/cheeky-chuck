@@ -85,8 +85,12 @@ def upscale(sess, src, dst):
     save_quantized(Image.fromarray((out * 255 + 0.5).astype(np.uint8), "RGBA"), dst)
 
 def save_quantized(im, dst):
-    """256-colour palette PNG: ~13% of the 32-bit size, visually identical for this flat cartoon art."""
-    im.quantize(256, method=Image.Quantize.FASTOCTREE).save(dst, optimize=True)
+    """256-colour palette PNG: ~13% of the 32-bit size, visually identical for this flat cartoon art.
+    Gradients band under a palette (the button panel did), so when the palette's mean error is above
+    1/255 the file is saved in true colour instead."""
+    q = im.quantize(256, method=Image.Quantize.FASTOCTREE)
+    err = np.abs(np.asarray(q.convert("RGBA"), dtype=np.int16) - np.asarray(im.convert("RGBA"), dtype=np.int16)).mean()
+    (q if err < 1.0 else im).save(dst, optimize=True)
 
 if args.requantize:
     n = 0
