@@ -89,6 +89,7 @@ function M.show(opts)
         up:removeSelf()
         if ok then
           print("[photosend] sent id=" .. tostring(d.id))
+          require("analytics").track("photo_sent", { comment = (v.comment.text or "") ~= "" })
           close(opts.onSent)
           return
         end

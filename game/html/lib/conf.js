@@ -30,6 +30,35 @@ function configurationCreateTouchButtons() {
         switchMe(soundBgBtn);
         setSoundBg(soundBgBtn);
     });
+
+    // "share anonymous stats" (analytics.lua): same plumbing as the sound switches
+    var statsBtn = document.getElementById('stats');
+    if (statsBtn) {
+        new TouchButton(statsBtn, function() {
+            switchMe(statsBtn);
+            setStats(statsBtn);
+        });
+        var params = parseUrlParameters();
+        if (sessionStorage && sessionStorage.stats) {
+            loadSound('stats', sessionStorage.stats);
+        } else if (params.stats) {
+            loadSound('stats', params.stats);
+        }
+    }
+}
+
+function setStats(myLink) {
+    var trueFalse = (myLink.className.indexOf('on') != -1) ? true : false;
+
+    if (sessionStorage) {
+        sessionStorage.stats = trueFalse;
+    }
+
+    if (isAndroid) {
+        reloadPageAndReplaceParam('stats', trueFalse);
+    } else {
+        self.location = "setting:stats=" + trueFalse;
+    }
 }
 
 addEventEgg(window, 'load', configurationCreateTouchButtons);
