@@ -55,7 +55,10 @@ end
 local function signIn(action, email, pw, cb)
   -- ponytail: progress is not synced yet; the server just stores what we send
   M.call(action, { email = email, password = pw, progress = {} }, function(ok, d)
-    if ok and d.token then save(d.token, d.email or email) end
+    if ok and d.token then
+      save(d.token, d.email or email)
+      local an = require("analytics"); an.identify(d.id or d.userId); an.track("account_" .. action)
+    end
     if cb then cb(ok, d) end
   end)
 end
@@ -63,6 +66,7 @@ function M.register(email, pw, cb) signIn("register", email, pw, cb) end
 function M.login(email, pw, cb) signIn("login", email, pw, cb) end
 
 function M.logout(cb)
+  do local an = require("analytics"); an.track("account_logout"); an.identify(nil) end
   M.call("logout", nil, function(ok, d) save(nil, nil); if cb then cb(ok, d) end end) -- signed out locally either way
 end
 
