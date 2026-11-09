@@ -236,6 +236,7 @@ function L4_1(A0_2, A1_2, A2_2, A3_2, A4_2)
     local L1_3, L2_3, L3_3, L4_3, L5_3, L6_3, L7_3, L8_3
     L1_3 = true
     L2_3 = A0_3.url
+    require("analytics").settingUrl(L2_3)
     L3_3 = L7_2
     L4_3 = string
     L4_3 = L4_3.format
@@ -494,6 +495,7 @@ function L4_1(A0_2, A1_2, A2_2, A3_2, A4_2)
     L8_3 = L8_3.background_3_unlocked
     L7_3 = L7_3(L8_3)
     L4_3 = L5_3 .. L6_3 .. L7_3
+    L4_3 = L4_3 .. "&stats=" .. tostring(require("analytics").consent() == true)
     L5_3 = platformIsAndroid
     if L5_3 then
       L5_3 = L4_3

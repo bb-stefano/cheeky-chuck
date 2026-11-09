@@ -185,4 +185,16 @@ main = root / "main.lua"
 s = main.read_text(encoding="utf-8")
 if 'require("compat")' not in s:
     main.write_text('require("compat")\n' + s, encoding="utf-8"); n += 1
+# confview.lua: the settings page's "share anonymous stats" switch (analytics.lua): every URL the page sends goes
+# through analytics.settingUrl, and the page is opened with the current choice (&stats=true|false).
+p = root / "confview.lua"
+s = p.read_text(encoding="utf-8")
+old = "  function L14_2(A0_3)\n    local L1_3, L2_3, L3_3, L4_3, L5_3, L6_3, L7_3, L8_3\n    L1_3 = true\n    L2_3 = A0_3.url\n"
+assert s.count(old) == 1, "confview.lua urlRequest listener not found"
+s = s.replace(old, old + '    require("analytics").settingUrl(L2_3)\n')
+old = '    L5_3 = platformIsAndroid\n    if L5_3 then\n      L5_3 = L4_3\n      L6_3 = "&android=true"\n'
+assert s.count(old) == 1, "confview.lua settings URL builder not found"
+s = s.replace(old, '    L4_3 = L4_3 .. "&stats=" .. tostring(require("analytics").consent() == true)\n' + old)
+p.write_text(s, encoding="utf-8"); n += 1
+
 print("patched files:", n)
