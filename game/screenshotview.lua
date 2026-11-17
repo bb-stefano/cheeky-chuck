@@ -626,11 +626,11 @@ function L11_1(A0_2, A1_2, A2_2, A3_2)
     L2_3 = display
     L2_3 = L2_3.newRect
     L3_3 = 0
-    L4_3 = 0
+    L4_3 = display.screenOriginY
     L5_3 = display
     L5_3 = L5_3.contentWidth
     L6_3 = display
-    L6_3 = L6_3.contentHeight
+    L6_3 = L6_3.contentHeight - 2 * display.screenOriginY
     L2_3 = L2_3(L3_3, L4_3, L5_3, L6_3)
     A0_3.alphaLayer = L2_3
     L2_3 = A0_3.alphaLayer

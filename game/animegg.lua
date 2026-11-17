@@ -3899,7 +3899,7 @@ function L11_1(A0_2, A1_2, A2_2, A3_2, A4_2, A5_2, A6_2)
     L0_3 = L0_3.play
     L2_3 = 1
     L3_3 = L29_2
-    L0_3(L1_3, L2_3, L3_3)
+    L0_3(L1_3, L2_3, L3_3, require("falltop").fall(L7_2))
   end
 
   function L27_2()
@@ -3967,6 +3967,7 @@ function L11_1(A0_2, A1_2, A2_2, A3_2, A4_2, A5_2, A6_2)
     L4_3 = L0_3
     L5_3 = L1_3
     L2_3(L3_3, L4_3, L5_3)
+    require("falltop").start(L7_2)
     L2_3 = L7_2
     L2_3 = L2_3.currentTimeline
     L3_3 = L2_3
@@ -5527,7 +5528,7 @@ function L11_1(A0_2, A1_2, A2_2, A3_2, A4_2, A5_2, A6_2)
     L4_3 = 0
     L5_3 = WORLD_WIDTH
     L6_3 = WORLD_HEIGHT
-    L2_3 = L2_3(L3_3, L4_3, L5_3, L6_3)
+    L2_3 = (TALLBG_DARK_RECT or L2_3)(L3_3, L4_3, L5_3, L6_3)
     L1_3.turnOffLightDarkBg = L2_3
     L1_3 = L7_2
     L1_3 = L1_3.turnOffLightDarkBg

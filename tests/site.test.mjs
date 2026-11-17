@@ -17,8 +17,8 @@ test('landing page has title, description, OG image, app JSON-LD and the gallery
  assert.match(html,/og:image/);
  assert.match(html,/"@type": "MobileApplication"/);
  assert.match(html,/href="\/gallery"/);
- for(let i=1;i<=5;i++)assert.match(html,new RegExp(`assets/shot-${i}\\.png`));
- assert.match(html,/<nav id="stores"[^>]*>(?:(?!<\/nav>)[\s\S])*class="badge"(?:(?!<\/nav>)[\s\S])*class="badge"/);
+ for(let i=1;i<=5;i++)assert.match(html,new RegExp(`assets/shot-${i}\\.(?:png|jpe?g)`));
+ assert.match(html,/<nav id="stores"[^>]*>(?:(?!<\/nav>)[\s\S])*class="badge[^"]*"(?:(?!<\/nav>)[\s\S])*class="badge[^"]*"/);
 });
 
 test('gallery page loads gallery.js, which asks the API by id and by before=',()=>{

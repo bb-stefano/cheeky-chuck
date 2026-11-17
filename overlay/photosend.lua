@@ -22,6 +22,8 @@ local function cut(s, n)
   return s
 end
 
+local FIELD_FONT_SIZE = 14 -- content units (isFontSizeScaled), shared by the comment box and the email field
+
 function M.show(opts)
   if cur then return end
   local v, busy = {}, false
@@ -29,7 +31,7 @@ function M.show(opts)
   local g = display.newGroup()
   local cx = display.contentWidth / 2
   -- invisible full-screen layer: the framed photo stays visible, game touches are swallowed
-  local bg = display.newRect(g, 0, 0, display.contentWidth, display.contentHeight)
+  local bg = display.newRect(g, 0, display.screenOriginY, display.contentWidth, display.contentHeight - 2 * display.screenOriginY)
   bg.isVisible = false; bg.isHitTestable = true
   local function swallow() native.setKeyboardFocus(nil); return true end
   bg:addEventListener("touch", swallow); bg:addEventListener("tap", swallow)
@@ -38,6 +40,7 @@ function M.show(opts)
 
   v.comment = native.newTextBox(cx, 130, 260, 70)
   v.comment.isEditable = true
+  v.comment.size = FIELD_FONT_SIZE
   v.comment.placeholder = T("UI_COMMENT")
   v.comment:addEventListener("userInput", function(e)
     if e.phase == "editing" and e.target.text ~= cut(e.target.text, MAX_COMMENT) then
@@ -45,6 +48,7 @@ function M.show(opts)
     end
   end)
   v.email = native.newTextField(cx, 190, 260, 32)
+  v.email.size = FIELD_FONT_SIZE -- a text field defaults to a size derived from its height, a text box to the system size
   v.email.inputType = "email"
   v.email.placeholder = T("UI_FRIEND_EMAIL")
 
@@ -106,8 +110,26 @@ function M.show(opts)
     b.x, b.y = x, 440 -- below the framed photo (y 200-400)
     g:insert(b)
   end
-  button("cancel.png", cx - 60, function() if not busy then close(opts.onCancel) end end)
-  button("send.png", cx + 60, send)
+  -- Share: the phone's share sheet (X, Facebook, Instagram, messengers...) with the framed photo, posted by the
+  -- player's own apps. Facebook and Instagram no longer let a game post for ordinary players, so no OAuth here.
+  local function share()
+    if busy or v.closed then return end
+    local caption = (v.comment.text or ""):gsub("^%s+", ""):gsub("%s+$", "")
+    caption = (caption ~= "" and caption .. " " or "") .. "#CheekyChuck"
+    if not native.canShowPopup("social", "share") then
+      native.showAlert("Cheeky Chuck", T("UI_ERROR"), { "OK" }); return
+    end
+    native.setKeyboardFocus(nil)
+    native.showPopup("social", {
+      service = "share", message = caption, url = "https://cheekychuck.jocogiant.com",
+      image = { { filename = "screenshot.jpg", baseDir = system.DocumentsDirectory } },
+      listener = function(e) print("[photosend] share " .. tostring(e.action)) end,
+    })
+    require("analytics").track("photo_shared", { comment = caption ~= "#CheekyChuck" })
+  end
+  button("cancel.png", cx - 75, function() if not busy then close(opts.onCancel) end end)
+  button("share.png", cx, share)
+  button("send.png", cx + 75, send)
 end
 
 if TOUCH_DEBUG then

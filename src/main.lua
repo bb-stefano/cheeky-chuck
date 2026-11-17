@@ -210,7 +210,7 @@ L9_1 = 200
 DISMISS_NATIVE_UI_DELAY = L9_1
 L9_1 = "http://itunes.apple.com/app/cheeky-chuck/id487583415?mt=8"
 CHEEKY_CHUCK_2_ITUNES_URL = L9_1
-L9_1 = "market://details?id=com.eggsist.cheekychuckchamp"
+L9_1 = "market://details?id=com.jocogiant.cheekychuckchamp"
 CHEEKY_CHUCK_2_MARKET_URL = L9_1
 L9_1 = display
 L9_1 = L9_1.newGroup

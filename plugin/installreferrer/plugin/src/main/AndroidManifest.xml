@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Android 11+ package visibility: the referrer comes from the Play Store app's service. -->
+    <queries>
+        <package android:name="com.android.vending" />
+    </queries>
+    <application />
+</manifest>

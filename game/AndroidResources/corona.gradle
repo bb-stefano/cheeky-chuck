@@ -1,0 +1,4 @@
+// Applied by the Solar2D app build: Google's Install Referrer library for plugin.installreferrer (see plugin/installreferrer).
+dependencies {
+    implementation 'com.android.installreferrer:installreferrer:2.2'
+}

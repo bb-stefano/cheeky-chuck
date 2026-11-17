@@ -237,6 +237,7 @@ function L4_1(A0_2, A1_2, A2_2, A3_2, A4_2)
     L1_3 = true
     L2_3 = A0_3.url
     require("analytics").settingUrl(L2_3)
+    if L2_3:find("^https://") then system.openURL(L2_3); L1_3 = false end
     L3_3 = L7_2
     L4_3 = string
     L4_3 = L4_3.format

@@ -319,7 +319,7 @@ function L9_1(A0_2, A1_2, A2_2)
   return L3_2
 end
 
-showBannerAd = L9_1
+showBannerAd = function() return false end
 
 function L9_1(A0_2)
   local L1_2, L2_2

@@ -13,3 +13,19 @@ node_modules/
 dev-photos/
 *.db-shm
 *.db-wal
+# python venv for the art/upscale scripts (pip install pillow numpy)
+.venv/
+# CoronaBuilder output (dev/build-android.lua)
+build/
+# Codex image jobs (art/bg_tall/make_jobs.py); the collected masters are committed
+art/bg_tall/jobs/
+art/hints/jobs/
+art/icon/jobs/
+art/ui/jobs/
+plugin/installreferrer/build/
+plugin/installreferrer/.gradle/
+plugin/installreferrer/plugin/build/
+keys/
+
+# HTML5 build staged into the site by dev/web-index.py (57 MB, rebuilt for each deploy)
+site/play/

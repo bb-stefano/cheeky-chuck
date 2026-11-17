@@ -207,63 +207,7 @@ function L10_1(A0_2)
         return
       end
     end
-    L6_3 = A0_3.group
-    L7_3 = A0_3.x
-    L6_3.x = L7_3
-    L6_3 = A0_3.group
-    L7_3 = A0_3.y
-    L6_3.y = L7_3
-    L6_3 = A0_3.normRotation
-    L6_3 = L6_3 % 360
-    if L6_3 == 0 then
-      L7_3 = A0_3.group
-      L8_3 = L7_3
-      L7_3 = L7_3.translate
-      L9_3 = A0_3.group
-      L9_3 = L9_3.xReference or 0
-      L10_3 = A0_3.group
-      L10_3 = L10_3.yReference or 0
-      L7_3(L8_3, L9_3, L10_3)
-    elseif L6_3 == 180 then
-      L7_3 = A0_3.group
-      L8_3 = L7_3
-      L7_3 = L7_3.translate
-      L9_3 = A0_3.group
-      L9_3 = L9_3.xReference or 0
-      L9_3 = -L9_3
-      L10_3 = A0_3.group
-      L10_3 = L10_3.yReference or 0
-      L10_3 = -L10_3
-      L7_3(L8_3, L9_3, L10_3)
-    elseif L6_3 == 270 then
-      L7_3 = A0_3.group
-      L8_3 = L7_3
-      L7_3 = L7_3.translate
-      L9_3 = A0_3.group
-      L9_3 = L9_3.yReference or 0
-      L10_3 = A0_3.group
-      L10_3 = L10_3.xReference or 0
-      L10_3 = -L10_3
-      L7_3(L8_3, L9_3, L10_3)
-    elseif L6_3 == 90 then
-      L7_3 = A0_3.group
-      L8_3 = L7_3
-      L7_3 = L7_3.translate
-      L9_3 = A0_3.group
-      L9_3 = L9_3.yReference or 0
-      L9_3 = -L9_3
-      L10_3 = A0_3.group
-      L10_3 = L10_3.xReference or 0
-      L7_3(L8_3, L9_3, L10_3)
-    else
-      L7_3 = print
-      L8_3 = string
-      L8_3 = L8_3.format
-      L9_3 = "invalid rotation, angle=%f"
-      L10_3 = L6_3
-      L8_3, L9_3, L10_3 = L8_3(L9_3, L10_3)
-      L7_3(L8_3, L9_3, L10_3)
-    end
+    compat.placeAt(A0_3.group, A0_3.x, A0_3.y, A0_3.normRotation % 360)
   end
 
   L1_2.rotateAt = L2_2
