@@ -1,6 +1,4 @@
-//***************************************************//
-//***   Script by EGGsist Ltd - www.eggsist.com   ***//
-//***************************************************//
+/*** code by Joco Giant | jocogiant.com ***/
 
 var postmsg = {};
 

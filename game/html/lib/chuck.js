@@ -1,4 +1,4 @@
-/*** code by EGGsist | www.eggsist.com ***/
+/*** code by Joco Giant | jocogiant.com ***/
 
 var cid = null;
 

@@ -1,4 +1,7 @@
+require("webstubs")
 require("compat")
+require("webaccel")
+require("reloaded")
 local L0_1, L1_1, L2_1, L3_1, L4_1, L5_1, L6_1, L7_1, L8_1, L9_1, L10_1, L11_1, L12_1, L13_1, L14_1, L15_1, L16_1, L17_1, L18_1, L19_1, L20_1, L21_1, L22_1, L23_1, L24_1, L25_1, L26_1, L27_1, L28_1, L29_1, L30_1, L31_1
 L0_1 = require
 L1_1 = "anim"
@@ -211,7 +214,7 @@ L9_1 = 200
 DISMISS_NATIVE_UI_DELAY = L9_1
 L9_1 = "http://itunes.apple.com/app/cheeky-chuck/id487583415?mt=8"
 CHEEKY_CHUCK_2_ITUNES_URL = L9_1
-L9_1 = "market://details?id=com.eggsist.cheekychuckchamp"
+L9_1 = "market://details?id=com.jocogiant.cheekychuckchamp"
 CHEEKY_CHUCK_2_MARKET_URL = L9_1
 L9_1 = display
 L9_1 = L9_1.newGroup
@@ -266,7 +269,7 @@ L11_1 = SCREEN_FINGERPRINT
 L9_1(L10_1, L11_1)
 L9_1 = display
 L9_1 = L9_1.screenOriginY
-if L9_1 < 0 then
+if false then -- letterbox: see tallbg.lua
   L9_1 = display
   L9_1 = L9_1.newRect
   L10_1 = 0
@@ -1019,11 +1022,11 @@ function L24_1(A0_2, A1_2)
     L1_3 = A0_3.splashVerImg
     L1_3.x = 5
     L1_3 = A0_3.splashVerImg
-    L1_3.y = 345
+    L1_3.y = 345 + (SPLASH_SHIFT_DOWN or 0)
     L1_3 = A0_3.splashLightImg
     L1_3.x = 127
     L1_3 = A0_3.splashLightImg
-    L1_3.y = 338
+    L1_3.y = 338 + (SPLASH_SHIFT_DOWN or 0)
     L1_3 = L4_1
     L1_3 = L1_3.readAnimDataFile
     L2_3 = L3_2
@@ -1071,7 +1074,7 @@ function L24_1(A0_2, A1_2)
   function L12_2(A0_3)
     local L1_3, L2_3, L3_3, L4_3, L5_3, L6_3, L7_3, L8_3, L9_3, L10_3
     L1_3 = 250
-    L2_3 = 395
+    L2_3 = 395 + (SPLASH_SHIFT_DOWN or 0)
     L3_3 = L1_3
     L4_3 = L2_3 + 50
     L5_3 = 40
@@ -1350,6 +1353,8 @@ if not __and_21 then
     end
   end
 end
+require("tallbg")
+require("catyowl")
 L27_1 = L5_1.newAudioController
 L28_1 = L25_1
 L27_1 = L27_1(L28_1)

@@ -34,7 +34,7 @@ function L0_1(...)
   L1_2 = {}
   L1_2.appName = "Cheeky Chuck"
   L1_2.appVersion = "1.0"
-  L1_2.appPackageId = "com.eggsist.cheekychuck"
+  L1_2.appPackageId = "com.jocogiant.cheekychuck"
   L1_2.appId = "84604e0d53f8e809e7.83669851"
   L1_2.userId = "8460"
   L1_2.subscription = "pro"

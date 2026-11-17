@@ -16,7 +16,7 @@ local PLATFORM = SIM and "simulator" or tostring(system.getInfo("platform") or "
 local VERSION = tostring(system.getInfo("appVersionString") or APP_VERSION or "")
 do local code = system.getInfo("androidAppVersionCode"); if code then VERSION = VERSION .. "+" .. tostring(code) end end
 
-local state, queue, dirty = { anon = nil, consent = nil, user = nil }, {}, false
+local state, queue, dirty = { anon = nil, consent = nil, user = nil, install = false }, {}, false
 local session, hiddenAt, sending, sentAt, failures, retryAt = nil, 0, false, 0, 0, 0
 local saveTimer, started = nil, false
 
@@ -33,7 +33,7 @@ local function path() return system.pathForFile(FILE, system.DocumentsDirectory)
 local function save()
   dirty = false
   local p = path(); local f = p and io.open(p, "w")
-  if f then f:write(json.encode({ anon = state.anon, consent = state.consent, user = state.user, queue = queue })); f:close() end
+  if f then f:write(json.encode({ anon = state.anon, consent = state.consent, user = state.user, install = state.install, queue = queue })); f:close() end
 end
 local function saveSoon() -- the queue can hold thousands of events: coalesce the writes
   dirty = true
@@ -45,7 +45,7 @@ local function load()
   if f then
     local ok, t = pcall(json.decode, f:read("*a")); f:close()
     if ok and type(t) == "table" then
-      state.anon, state.user = t.anon, t.user
+      state.anon, state.user, state.install = t.anon, t.user, t.install == true
       if t.consent == true or t.consent == false then state.consent = t.consent end
       if type(t.queue) == "table" then queue = t.queue end
     end
@@ -184,6 +184,47 @@ function M.settingUrl(url)
   if yes ~= (M.consent() == true) then M.setConsent(yes) end
 end
 
+-- Install attribution. On the first launch the Play install referrer (the referrer= part of the Play Store link that
+-- delivered the install, i.e. a tracking link's utm_* tags) is read through plugin.installreferrer
+-- (plugin/installreferrer) and sent as an `install` event; the server files the player under its utm_campaign, or
+-- as organic when there is none. Google tags organic Play installs "utm_source=google-play&utm_medium=organic"
+-- and Google Ads app campaigns carry a gclid instead of utm tags. A sideloaded or debug APK has no referrer
+-- (via = "none"). If the Play Store does not answer, nothing is recorded and the next launch asks again.
+local function decode(s) return (tostring(s):gsub("%+", " "):gsub("%%(%x%x)", function(h) return string.char(tonumber(h, 16)) end)) end
+local function parseReferrer(ref)
+  local props = {}
+  if not ref:find("=", 1, true) then ref = decode(ref) end -- a link that encoded the whole referrer twice
+  for k, v in ref:gmatch("([^&=]+)=?([^&]*)") do
+    k = decode(k):lower()
+    if k:match("^utm_[%a_]+$") then props[k] = decode(v):sub(1, 64) end
+    if k == "gclid" then props.gclid = true end
+  end
+  if props.gclid and not props.utm_campaign then props.utm_source, props.utm_campaign = props.utm_source or "google_ads", "google_ads" end
+  return props
+end
+M.parseReferrer = parseReferrer
+local function recordInstall()
+  if state.install then return end
+  local function done(props)
+    state.install = true; save(); M.track("install", props)
+    print("[analytics] install " .. json.encode(props))
+  end
+  local ok, plugin = pcall(require, "plugin.installreferrer")
+  if not ok or type(plugin) ~= "table" or type(plugin.get) ~= "function" then
+    return done({ via = "none", reason = PLATFORM ~= "android" and PLATFORM or "no plugin" })
+  end
+  local asked = plugin.get(function(e)
+    local ref = tostring(e.referrer or "")
+    local props = parseReferrer(ref)
+    props.referrer, props.via = ref:sub(1, 200), ref ~= "" and "play" or "none"
+    if e.error then props.reason = tostring(e.error) end
+    if (tonumber(e.clickTime) or 0) > 0 then props.click_ts = e.clickTime end
+    if (tonumber(e.installTime) or 0) > 0 then props.install_ts = e.installTime end
+    done(props)
+  end)
+  if not asked then done({ via = "none", reason = "no activity" }) end
+end
+
 function M.init() -- the Flurry key the 2012 code passes is ignored
   if started then return end
   started = true
@@ -192,6 +233,7 @@ function M.init() -- the Flurry key the 2012 code passes is ignored
   startSession()
   timer.performWithDelay(EVERY_MS, M.flush, 0)
   timer.performWithDelay(2000, M.flush)
+  timer.performWithDelay(1000, recordInstall)
   print(string.format("[analytics] %s %s %s: consent=%s queued=%d%s", GAME, VERSION, PLATFORM, tostring(M.consent()), #queue, SIM and " (simulator: no upload)" or ""))
 end
 

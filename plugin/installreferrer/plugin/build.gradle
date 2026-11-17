@@ -1,0 +1,19 @@
+apply plugin: 'com.android.library'
+
+android {
+    compileSdk 35
+    defaultConfig {
+        namespace "plugin.installreferrer"   // Lua: require("plugin.installreferrer") -> plugin.installreferrer.LuaLoader
+        minSdkVersion 15
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_11
+        targetCompatibility JavaVersion.VERSION_11
+    }
+}
+
+dependencies {
+    compileOnly ':Corona@aar'
+    // The app build gets the same library through game/AndroidResources/corona.gradle (the AAR does not carry it).
+    compileOnly 'com.android.installreferrer:installreferrer:2.2'
+}

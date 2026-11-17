@@ -21,6 +21,7 @@ switching on sends `consent_given`.
 | event | props | where |
 | --- | --- | --- |
 | `session_start` | `tz` (UTC offset), `lang` | init, and on resume after 30 min in the background |
+| `install` | `via` (`play`/`none`), `utm_source`, `utm_medium`, `utm_campaign`, `utm_content`, `utm_term`, `gclid`, `referrer`, `click_ts`, `install_ts`, `reason` | once, 1 s after init (see Install attribution) |
 | `session_pause` | | applicationSuspend |
 | `scene_view` | `scene` (01, 02, 03, christmas_01, …) | newBackground / reload |
 | `reaction` | `name` (the `stopAndPlay<Name>` method: Rain, Tickle, …; idle/breath/blink noise skipped, 1 per name per 2 s) | the character's methods |
@@ -37,3 +38,16 @@ switching on sends `consent_given`.
 Simulator: `~/Library/Application Support/Corona Simulator/game-*/Documents/analytics.json` fills with events
 (`queue`), nothing is uploaded. Device: `adb logcat -s Corona | grep analytics` shows the init line; the queue
 drains against the server every 30 s while the app is up.
+
+## Install attribution (2026-11-10)
+Every install is filed under the ad campaign that delivered it, or as organic. The ad's link is a Play Store link with
+the tags in `referrer=`, e.g. `https://play.google.com/store/apps/details?id=com.jocogiant.cheekychuck&referrer=utm_source%3Dfacebook%26utm_medium%3Dcpc%26utm_campaign%3Dlaunch`
+(the dashboard's "Installs by source" section builds them). The Play Store hands the referrer to the app at install
+time; on the first launch `recordInstall` reads it through `plugin.installreferrer` (our one-class Android plugin in
+`plugin/installreferrer`, built by `sh plugin/installreferrer/build.sh` into `game/AndroidResources/plugin.installreferrer.aar`;
+`game/AndroidResources/corona.gradle` adds Google's Install Referrer library to the app build) and sends the `install`
+event with the parsed `utm_*` tags. The server takes the player's source/campaign from it; no campaign = organic.
+Google tags organic Play installs `utm_source=google-play&utm_medium=organic`; Google Ads app campaigns send a
+`gclid`, filed as campaign `google_ads`. A sideloaded or debug APK gets no referrer (`via=none`, `reason=service
+unavailable`), so the end-to-end check needs a build installed from a Play testing track. If the Play Store does not
+answer, nothing is recorded and the next launch asks again (`install` flag in `analytics.json`).

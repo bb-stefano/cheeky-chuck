@@ -1,6 +1,4 @@
-//***************************************************//
-//***   Script by EGGsist Ltd - www.eggsist.com   ***//
-//***************************************************//
+/*** code by Joco Giant | jocogiant.com ***/
 
 var apiPrefix = 'http://api.cheekychuck.com/api/1.0/';
 var renrenPrefix = apiPrefix + 'renren/login.php?cid=';
@@ -23,7 +21,8 @@ localization.error          = { en : 'Error',                         zh : '错�
 localization.not_logged_in  = { en : 'Not logged in yet',             zh : '尚未登录',        it : 'Spento',                          jp : 'ログインしていません。'};
 localization.posting_active = { en : 'Posting to __SNS__ is active!', zh : '__SNS__已激活！', it : 'Pubblicazione su __SNS__ attiva', jp : '__SNS__に送信中です'};
 localization.disabled       = { en : 'Disabled',                      zh : '无效',            it : 'Disabilitato',                    jp : '無効'};
-localization.sns_twitter    = { en : 'Twitter',                       zh : 'Twitter',         it : 'Twitter',                         jp : 'Twitter'};
+localization.sns_twitter    = { en : 'X',                             zh : 'X',               it : 'X',                               jp : 'X'};
+localization.sns_instagram  = { en : 'Instagram',                     zh : 'Instagram',       it : 'Instagram',                       jp : 'Instagram'};
 localization.sns_facebook   = { en : 'Facebook',                      zh : 'Facebook',        it : 'Facebook',                        jp : 'Facebook'};
 localization.sns_renren     = { en : 'Renren',                        zh : '人人网',          it : 'Renren',                          jp : 'Renren'};
 localization.sns_sina_weibo = { en : 'Sina Weibo',                    zh : '新浪微博',        it : 'Sina Weibo',                      jp : 'Sina Weibo'};
@@ -78,6 +77,7 @@ var mapDivIdToSnsName = {
     'renren'    : localization.sns_renren,
     'twitter'   : localization.sns_twitter,
     'facebook'  : localization.sns_facebook,
+    'instagram' : localization.sns_instagram,
     'sinaweibo' : localization.sns_sina_weibo,
     'msn'       : localization.sns_msn
 }
@@ -103,7 +103,7 @@ function fetchLoginStatus() {
             }
         },
         error: function(jqXHR, textStatus, errorThrown) {
-            $.each(['renren', 'twitter', 'facebook', 'sinaweibo', 'msn'], function(index, divId) {
+            $.each(['twitter', 'facebook', 'instagram'], function(index, divId) {
                 $('#' + divId + ' > a').removeClass('loading');
                 $('#' + divId + ' > a').addClass('disabled');
                 $('#' + divId + ' > p').text(localization.get(localization.disabled));
@@ -225,11 +225,8 @@ function updateSnsInPage(data) {
     if (typeof(data.sin) !== 'undefined') { sin = data.sin; }
     if (typeof(data.msn) !== 'undefined') { msn = data.msn; }
 
-    updatePage(ren, 'renren');
     updatePage(twt, 'twitter');
     updatePage(fcb, 'facebook');
-    updatePage(sin, 'sinaweibo');
-    updatePage(msn, 'msn');
 }
 
 
@@ -274,15 +271,26 @@ function loginCallBack(loginFormId, ajaxResult) {
     }
 }
 
+// The 2012 login server (api.cheekychuck.com) is gone, and Facebook and Instagram no longer let a game post for
+// ordinary players: photos go out through the phone's share sheet (the Share button on the photo screen,
+// photosend.lua), signed in with the player's own apps. So the rows explain that instead of offering a login.
+localization.share_hint = { en : 'Share your photos with the camera button!',
+                            zh : '用相机按钮分享你的照片！',
+                            it : 'Condividi le tue foto con il pulsante della fotocamera!',
+                            jp : 'カメラボタンで写真をシェアしよう！'};
+
 function snsPageInit() {
-    fetchLoginStatus();
+    $.each(['twitter', 'facebook', 'instagram'], function(index, divId) {
+        $('#' + divId + ' > a').remove();
+        $('#' + divId).css('padding-right', '12px');
+        $('#' + divId + ' > p').attr('class', 'blue').text(localization.get(localization.share_hint));
+    });
+    return;
 
     // create touch buttons
+    // only X (still id "twitter"), Facebook and Instagram are listed now; Renren, Weibo and Windows Live are gone
     new TouchButton($('#twitter a').get(0),    loginTwitter);
     new TouchButton($('#facebook a').get(0),   loginFacebook);
-    new TouchButton($('#renren a').get(0),     loginRenren);
-    new TouchButton($('#sinaweibo a').get(0),  loginSinaWeibo);
-    new TouchButton($('#msn a').get(0),        loginWindowsLive);
 }
 
 addEventEgg(window, 'load', snsPageInit);

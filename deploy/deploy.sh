@@ -25,6 +25,7 @@ fi
 REMOTE
 
 npm test >/dev/null
+node scripts/check-no-ai-mentions.mjs site server
 # Production-only node_modules, installed in a temp dir so the developer's node_modules (with devDependencies) is untouched.
 TMP=$(mktemp -d)
 trap 'rm -rf "$TMP"' EXIT

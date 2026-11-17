@@ -110,6 +110,26 @@ function compat.setProp(o, k, v)
   local ax, ay = parent:contentToLocal(o:localToContent(p.x, p.y))
   o.x, o.y = o.x + bx - ax, o.y + by - ay
 end
+-- v1 anim.lua rotateAt epilogue: after `group:rotate(a)` the 2012 code re-placed the group so that its reference
+-- point sat at the timeline's (x, y) plus the reference offset turned by the rotation. In v1 group.x WAS the
+-- reference point, so with the group flipped (xScale = -1, Chuck facing left) the content still mirrored around
+-- the pivot. The verbatim code under v2 set the ORIGIN there instead, which while flipped threw the character a
+-- timeline-width to the left until the next flip or animation ("Chuck teleports to the left edge"). Place the
+-- origin so the pivot lands where v1 put it, whatever the current flip/rotation (patch_game.py routes the block here).
+function compat.placeAt(o, x, y, angle)
+  local p = o._pivot or { x = 0, y = 0 }
+  local rx, ry = p.x, p.y
+  local ox, oy
+  if angle == 0 then ox, oy = rx, ry
+  elseif angle == 180 then ox, oy = -rx, -ry
+  elseif angle == 270 then ox, oy = ry, -rx
+  elseif angle == 90 then ox, oy = -ry, rx
+  else print(string.format("invalid rotation, angle=%f", angle)); return end
+  local parent = o.parent or display.getCurrentStage()
+  local px, py = parent:contentToLocal(o:localToContent(rx, ry)) -- where the pivot is now (parent coords)
+  local zx, zy = parent:contentToLocal(o:localToContent(0, 0))   -- where the origin is now
+  o.x, o.y = x + ox - (px - zx), y + oy - (py - zy)
+end
 function compat.setXRef(o, v) compat.setRef(o, v, nil) end
 function compat.setYRef(o, v) compat.setRef(o, nil, v) end
 
@@ -165,7 +185,12 @@ do
     if type(opts) == "table" and opts.baseUrl and not url:find("^%a+://") then
       local path, query = url:match("^([^?]*)(.*)$")
       local abs = system.pathForFile(path, opts.baseUrl)
-      if abs then
+      if system.getInfo("platform") == "android" and opts.baseUrl == system.ResourceDirectory then
+        -- Android (targetSdk 30+): the WebView refuses file:// pages ("ERR_ACCESS_DENIED" error page) and Solar2D
+        -- never turns file access back on; APK assets stay readable through file:///android_asset/.
+        a[i] = "file:///android_asset/" .. path .. query
+        a[i + 1] = { hasBackground = opts.hasBackground, urlRequest = opts.urlRequest }
+      elseif abs then
         a[i] = "file:///" .. abs:gsub("\\", "/") .. query
         a[i + 1] = { hasBackground = opts.hasBackground, urlRequest = opts.urlRequest }
       end
@@ -189,7 +214,7 @@ end
 -- Lines: tap X Y | dtap X Y | began/moved/ended X Y [id] | wait MS | lua <code>
 -- ponytail: hit-test = topmost leaf whose contentBounds contain the point, then its parents, then Runtime
 if TOUCH_DEBUG and system.getInfo("environment") == "simulator" then
-  local CMD = "C:/work/games/cheekychuck/touchcmd.txt"
+  local CMD = system.pathForFile("") .. "/../touchcmd.txt" -- <repo>/touchcmd.txt, next to game/ (any OS)
   local function leafAt(x, y, g)
     for i = g.numChildren, 1, -1 do
       local o = g[i]

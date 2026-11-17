@@ -1,11 +1,21 @@
 settings = {
+  splashScreen = { enable = false }, -- no "Made with Solar2D" screen at launch
   -- Content stays portrait; the game rotates its own UI from "orientation" events (orientation.lua).
   orientation = { default = "portrait", supported = { "portrait" } },
   android = {
+    -- Android 7.0+: Google Play's automatic integrity protection (on for this app) refuses bundles with a lower minimum.
+    minSdkVersion = "24",
     usesPermissions = { "android.permission.INTERNET", "android.permission.VIBRATE" },
+    -- full screen behind the system bars: tallbg.lua draws the tall scene art edge to edge
+    androidSystemUiVisibility = "immersiveSticky",
   },
+  -- web (and desktop) only: the canvas follows the browser window instead of keeping the 2:3 content shape,
+  -- so tall phones get tallbg.lua's tall art instead of black bands (phones ignore this section)
+  window = { resizable = true, defaultViewWidth = 320, defaultViewHeight = 693 },
   iphone = {
     plist = { UIStatusBarHidden = true, CFBundleDisplayName = "Cheeky Chuck" },
   },
   excludeFiles = { all = { "*.err", "ReadMe.txt" } },
+  -- the share sheet behind the photo screen's Share button (photosend.lua): X, Facebook, Instagram and the rest
+  plugins = { ["CoronaProvider.native.popup.social"] = { publisherId = "com.coronalabs" } },
 }

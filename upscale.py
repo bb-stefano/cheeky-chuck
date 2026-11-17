@@ -9,7 +9,7 @@ import onnxruntime as ort
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
 GAME = os.path.join(ROOT, "game")
-DIRS = ["animpic", "uipic", "hints", "intro"]
+DIRS = ["animpic", "uipic", "hints", "intro", "html/im"]  # html/im: the round ok/cancel/send buttons the Lua dialogs draw
 MODEL = os.path.join(ROOT, "models", "RealESRGAN_x4plus_anime_6B.onnx")
 TILE, PAD = 192, 12  # ponytail: CPU-friendly tiles; seams invisible at this overlap
 
@@ -20,12 +20,12 @@ ap.add_argument("--sizes-only", action="store_true")
 ap.add_argument("--requantize", action="store_true", help="palette-compress already produced @4x files")
 args = ap.parse_args()
 
-def all_pngs():
+def all_pngs(filtered=True):
     out = []
     for d in DIRS:
         out += glob.glob(os.path.join(GAME, d, "**", "*.png"), recursive=True)
     out = [f for f in out if "@4x" not in os.path.basename(f)]
-    if args.only:
+    if args.only and filtered:
         only = {os.path.normpath(f) for f in glob.glob(os.path.join(GAME, args.only), recursive=True)}
         out = [f for f in out if os.path.normpath(f) in only]
     return sorted(out)
@@ -101,7 +101,10 @@ if args.requantize:
     print("requantized", n); sys.exit(0)
 
 files = all_pngs()
-write_sizes(all_pngs() if args.only else files)
+# always every image: imgsizes.lua is the whole table, --only or not; JPGs (the tall scene backgrounds,
+# art/bg_tall/extend.py) are listed too but never upscaled here
+write_sizes(sorted(all_pngs(filtered=False) + [f for d in DIRS for f in glob.glob(os.path.join(GAME, d, "**", "*.jpg"), recursive=True)
+                                               if "@4x" not in os.path.basename(f)]))
 print(f"{len(files)} images; sizes table written")
 if args.sizes_only: sys.exit(0)
 so = ort.SessionOptions(); so.intra_op_num_threads = args.threads

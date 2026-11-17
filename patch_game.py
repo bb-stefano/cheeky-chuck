@@ -113,6 +113,18 @@ for name in ("allowPunch", "stopAndPlayPunchStomach", "stopAndPlayPunchFace", "s
     assert n_w == 1, f"animegg wrapper {name}: {n_w}"
 ae.write_text(s, encoding="utf-8")
 
+# 180-degree turn drop on tall screens (overlay/falltop.lua): START_FALL_FRONT hangs from the screen's top edge instead
+# of the world square's, FALL_FRONT takes the extra height away over its own falling frames (same landing spot and time).
+s = ae.read_text(encoding="utf-8")
+old = ("    L2_3(L3_3, L4_3, L5_3)\n    L2_3 = L7_2\n    L2_3 = L2_3.currentTimeline\n    L3_3 = L2_3\n    L2_3 = L2_3.show\n    L2_3(L3_3)\n"
+       "    L2_3 = L7_2\n    L2_3 = L2_3.currentTimeline\n    L3_3 = L2_3\n    L2_3 = L2_3.play\n    L4_3 = 1\n    L5_3 = L28_2\n")
+assert s.count(old) == 1, f"L27_2 moveTo/show/play site: {s.count(old)}"
+s = s.replace(old, old.replace("    L2_3(L3_3, L4_3, L5_3)\n", "    L2_3(L3_3, L4_3, L5_3)\n    require(\"falltop\").start(L7_2)\n", 1))
+old = "    L2_3 = 1\n    L3_3 = L29_2\n    L0_3(L1_3, L2_3, L3_3)\n"
+assert s.count(old) == 1, f"L28_2 play site: {s.count(old)}"
+s = s.replace(old, "    L2_3 = 1\n    L3_3 = L29_2\n    L0_3(L1_3, L2_3, L3_3, require(\"falltop\").fall(L7_2))\n")
+ae.write_text(s, encoding="utf-8")
+
 # hit-test diagnostics (anim.lua containsPointAt), printed only when TOUCH_DEBUG
 an = root / "anim.lua"
 s = an.read_text(encoding="utf-8")
@@ -185,16 +197,88 @@ main = root / "main.lua"
 s = main.read_text(encoding="utf-8")
 if 'require("compat")' not in s:
     main.write_text('require("compat")\n' + s, encoding="utf-8"); n += 1
+# Web build: LuaSocket stand-ins (overlay/webstubs.lua; a no-op on the phones), first of all: compat.lua and the
+# 2012 modules require socket / mime, which the HTML5 runtime lacks (the game stopped at start-up, black screen).
+s = main.read_text(encoding="utf-8")
+if 'require("webstubs")' not in s:
+    main.write_text(s.replace('require("compat")\n', 'require("webstubs")\nrequire("compat")\n', 1), encoding="utf-8"); n += 1
+# Web build: accelerometer events from the browser's motion sensor (overlay/webaccel.lua; a no-op on the phones).
+s = main.read_text(encoding="utf-8")
+if 'require("webaccel")' not in s:
+    main.write_text(s.replace('require("compat")\n', 'require("compat")\nrequire("webaccel")\n', 1), encoding="utf-8"); n += 1
+# Home screen: "Reloaded" under the logo (overlay/reloaded.lua); it hooks display.newImage, so it loads before the splash.
+s = main.read_text(encoding="utf-8")
+if 'require("reloaded")' not in s:
+    main.write_text(s.replace('require("webaccel")\n', 'require("webaccel")\nrequire("reloaded")\n', 1), encoding="utf-8"); n += 1
+# Tall screens (overlay/tallbg.lua): the module replaces main.lua's black letterbox rects (it draws the tall
+# scene art there) and must load after the SCREEN_* groups exist and before newGame.
+s = main.read_text(encoding="utf-8")
+old = "L9_1 = L9_1.screenOriginY\nif L9_1 < 0 then\n"
+assert s.count(old) == 1, f"letterbox site: {s.count(old)}"
+s = s.replace(old, "L9_1 = L9_1.screenOriginY\nif false then -- letterbox: see tallbg.lua\n")
+old = "L27_1 = L5_1.newAudioController\n"
+assert s.count(old) == 1, f"newAudioController site: {s.count(old)}"
+s = s.replace(old, 'require("tallbg")\nrequire("catyowl")\n' + old)  # catyowl: the room's cat yowls on a double tap
+main.write_text(s, encoding="utf-8")
+
+# Splash layout on tall screens (tallbg.lua sets SPLASH_SHIFT_DOWN): buttons, version tag and light rays move down.
+s = main.read_text(encoding="utf-8")
+for old in ("    L2_3 = 395\n    L3_3 = L1_3\n", "    L1_3.y = 345\n", "    L1_3.y = 338\n"):
+    assert s.count(old) == 1, f"splash site {old!r}: {s.count(old)}"
+    s = s.replace(old, old.replace("\n", " + (SPLASH_SHIFT_DOWN or 0)\n", 1))
+main.write_text(s, encoding="utf-8")
+
+# Snapshot: the dark gradient behind the photo preview was a 320x480 rect; on tall screens it must cover the
+# letterbox area too (screenOriginY is <= 0 there).
+sv = root / "screenshotview.lua"
+s = sv.read_text(encoding="utf-8")
+old = ("    L2_3 = L2_3.newRect\n    L3_3 = 0\n    L4_3 = 0\n    L5_3 = display\n    L5_3 = L5_3.contentWidth\n"
+       "    L6_3 = display\n    L6_3 = L6_3.contentHeight\n    L2_3 = L2_3(L3_3, L4_3, L5_3, L6_3)\n    A0_3.alphaLayer = L2_3\n")
+new = ("    L2_3 = L2_3.newRect\n    L3_3 = 0\n    L4_3 = display.screenOriginY\n    L5_3 = display\n    L5_3 = L5_3.contentWidth\n"
+       "    L6_3 = display\n    L6_3 = L6_3.contentHeight - 2 * display.screenOriginY\n    L2_3 = L2_3(L3_3, L4_3, L5_3, L6_3)\n    A0_3.alphaLayer = L2_3\n")
+assert s.count(old) == 1, f"snapshot overlay site: {s.count(old)}"
+sv.write_text(s.replace(old, new), encoding="utf-8")
+# anim.lua rotateAt: the v1 "put the reference point back at (x, y)" block assumed group.x is the pivot; under v2
+# it is the origin, so a flipped character landed a timeline-width to the left. compat.placeAt does it right.
+p = root / "anim.lua"
+s = p.read_text(encoding="utf-8")
+pat = re.compile(r"    L6_3 = A0_3\.group\n    L7_3 = A0_3\.x\n    L6_3\.x = L7_3\n    L6_3 = A0_3\.group\n    L7_3 = A0_3\.y\n"
+                 r"    L6_3\.y = L7_3\n    L6_3 = A0_3\.normRotation\n    L6_3 = L6_3 % 360\n    if L6_3 == 0 then\n.*?"
+                 r"\n    end\n  end\n[ \t]*\n  L1_2\.rotateAt = L2_2", re.S)
+assert len(pat.findall(s)) == 1, "anim.lua rotateAt epilogue not found"
+s = pat.sub("    compat.placeAt(A0_3.group, A0_3.x, A0_3.y, A0_3.normRotation % 360)\n  end\n\n  L1_2.rotateAt = L2_2", s)
+p.write_text(s, encoding="utf-8"); n += 1
+
 # confview.lua: the settings page's "share anonymous stats" switch (analytics.lua): every URL the page sends goes
 # through analytics.settingUrl, and the page is opened with the current choice (&stats=true|false).
 p = root / "confview.lua"
 s = p.read_text(encoding="utf-8")
 old = "  function L14_2(A0_3)\n    local L1_3, L2_3, L3_3, L4_3, L5_3, L6_3, L7_3, L8_3\n    L1_3 = true\n    L2_3 = A0_3.url\n"
 assert s.count(old) == 1, "confview.lua urlRequest listener not found"
-s = s.replace(old, old + '    require("analytics").settingUrl(L2_3)\n')
+# A https link in the page (the privacy policy, which Google Play requires to be reachable from inside the app) opens
+# in the system browser instead of the settings pop-up: L1_3 is the listener's "load it" result (false = cancel).
+s = s.replace(old, old + '    require("analytics").settingUrl(L2_3)\n'
+    + '    if L2_3:find("^https://") then system.openURL(L2_3); L1_3 = false end\n')
 old = '    L5_3 = platformIsAndroid\n    if L5_3 then\n      L5_3 = L4_3\n      L6_3 = "&android=true"\n'
 assert s.count(old) == 1, "confview.lua settings URL builder not found"
 s = s.replace(old, '    L4_3 = L4_3 .. "&stats=" .. tostring(require("analytics").consent() == true)\n' + old)
 p.write_text(s, encoding="utf-8"); n += 1
 
+# Lights off: the black rect that darkens the room covers the 2012 square only; tallbg.lua's TALLBG_DARK_RECT
+# makes it cover a tall screen too (plain display.newRect when tallbg is not loaded).
+p = root / "animegg.lua"
+s = p.read_text(encoding="utf-8")
+old = "    L5_3 = WORLD_WIDTH\n    L6_3 = WORLD_HEIGHT\n    L2_3 = L2_3(L3_3, L4_3, L5_3, L6_3)\n    L1_3.turnOffLightDarkBg = L2_3\n"
+assert s.count(old) == 1, f"animegg.lua lights-off rect: {s.count(old)}"
+s = s.replace(old, old.replace("L2_3 = L2_3(L3_3", "L2_3 = (TALLBG_DARK_RECT or L2_3)(L3_3"))
+p.write_text(s, encoding="utf-8"); n += 1
+
 print("patched files:", n)
+
+# The 2012 "Cheeky Chuck Champ" promo banner (bannerad.lua, shown after punches) linked a store page that no
+# longer exists, and a store build must not carry a dead house ad: never show it.
+ba = root / "bannerad.lua"
+s = ba.read_text(encoding="utf-8")
+s, n_ba = re.subn(r"\nshowBannerAd = L9_1\n", "\nshowBannerAd = function() return false end\n", s)
+assert n_ba == 1, "bannerad showBannerAd export not found"
+ba.write_text(s, encoding="utf-8")
