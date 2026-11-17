@@ -45,7 +45,7 @@ Download Cheeky Chuck for free and find out what the cheekiest virtual pet does 
 
 ## Console state (2026-11-16)
 
-Everything in "Set up your app" is complete. Internal testing release 1.6 (7) is live for the testers, and the listing + declarations (10 changes) were submitted for Google review on 2026-11-17 (typically up to 7 days). A production release is a separate step (Test and release > Production > Create new release, same bundle).
+Everything in "Set up your app" is complete. Internal testing releases 1.6 (7) and 1.6 (8) are live for the testers (8 = cat yowl, top-edge drop, hi-dpi settings pages), and the listing + declarations (10 changes) were submitted for Google review on 2026-11-17 (typically up to 7 days). A production release is a separate step (Test and release > Production > Create new release, same bundle).
 
 - Store listing: title/short/full above, icon 512, feature graphic 1024x500 and 5 phone screenshots (art/store/), AI asset declaration "don't label" (the art is upscaled original artwork, not generated).
 - Store settings: Game > Simulation, tags Casual/Pet/Simulation, contact support@jocogiant.com, site https://cheekychuck.jocogiant.com.
@@ -55,7 +55,7 @@ Everything in "Set up your app" is complete. Internal testing release 1.6 (7) is
 - Target audience: 13-15, 16-17, 18+ only (the email/password accounts and public gallery would otherwise need COPPA handling).
 - Data safety: collected, not shared, encrypted in transit, all optional: email address (account), photos and other user-generated content (gallery), app interactions and device/other IDs (anonymous analytics, opt-out switch). Account deletion URL above.
 - Ads: none. Advertising ID: not used (the manifest has no AD_ID permission). Government / financial / health: none. Trader status: inherited from the organization account (yes). No Terms of Service URL.
-- Internal testing: tester list "Joco Giant team" selected; first release = build/play/Cheeky Chuck-release.aab, uploaded 2026-11-17 (see Release build below).
+- Internal testing: tester list "Joco Giant team" selected; releases 1.6 (7) and 1.6 (8) = build/play/Cheeky Chuck-release.aab, 2026-11-17 (see Release build below). Production: first release 1.6 (8), all countries, sent for review 2026-11-17 (goes live on approval: managed publishing is off).
 - In-app privacy link: every configuration_*.html / android_configuration_*.html page ends with a link to the policy; confview.lua opens https links in the system browser (patch_game.py).
 
 ## Release build
