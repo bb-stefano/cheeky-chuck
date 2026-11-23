@@ -13,6 +13,16 @@ local MAX_QUEUE, BATCH, EVERY_MS, MAX_BACKOFF_MS, SESSION_GAP_MS = 5000, 50, 300
 local FILE, OPT_OUT = "analytics.json", true
 local SIM = system.getInfo("environment") == "simulator"
 local PLATFORM = SIM and "simulator" or tostring(system.getInfo("platform") or "unknown")
+-- The device, as the web games report it (2026-11-23): os (android, ios, mac, windows, other) and form (phone, tablet, pc).
+-- An iPad says so in its model; an Android device is a tablet when its screen's short side is 3.5 inches or more.
+local DEVICE_OS = ({ android = "android", ios = "ios", macos = "mac", win32 = "windows" })[PLATFORM] or "other"
+local DEVICE_FORM = "pc"
+if DEVICE_OS == "ios" then
+  DEVICE_FORM = tostring(system.getInfo("model") or ""):find("iPad", 1, true) and "tablet" or "phone"
+elseif DEVICE_OS == "android" then
+  local ok, w, h = pcall(function() return system.getInfo("androidDisplayWidthInInches"), system.getInfo("androidDisplayHeightInInches") end)
+  DEVICE_FORM = ok and tonumber(w) and tonumber(h) and math.min(w, h) >= 3.5 and "tablet" or "phone"
+end
 local VERSION = tostring(system.getInfo("appVersionString") or APP_VERSION or "")
 do local code = system.getInfo("androidAppVersionCode"); if code then VERSION = VERSION .. "+" .. tostring(code) end end
 
@@ -101,7 +111,8 @@ end
 -- and coming back after SESSION_GAP_MS starts a new session.
 local function startSession()
   session = uuid()
-  M.track("session_start", { tz = os.date("%z"), lang = tostring(system.getPreference("locale", "language") or "") })
+  M.track("session_start", { tz = os.date("%z"), lang = tostring(system.getPreference("locale", "language") or ""),
+                             os = DEVICE_OS, form = DEVICE_FORM, ref = "direct" })
 end
 Runtime:addEventListener("system", function(e)
   if e.type == "applicationSuspend" then

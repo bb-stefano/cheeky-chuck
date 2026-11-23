@@ -20,7 +20,7 @@ switching on sends `consent_given`.
 ## Events
 | event | props | where |
 | --- | --- | --- |
-| `session_start` | `tz` (UTC offset), `lang` | init, and on resume after 30 min in the background |
+| `session_start` | `tz` (UTC offset), `lang`, `os` (android, ios, mac, windows, other), `form` (phone, tablet, pc), `ref` (always `direct`: an app has no linking site) | init, and on resume after 30 min in the background |
 | `install` | `via` (`play`/`none`), `utm_source`, `utm_medium`, `utm_campaign`, `utm_content`, `utm_term`, `gclid`, `referrer`, `click_ts`, `install_ts`, `reason` | once, 1 s after init (see Install attribution) |
 | `session_pause` | | applicationSuspend |
 | `scene_view` | `scene` (01, 02, 03, christmas_01, …) | newBackground / reload |
