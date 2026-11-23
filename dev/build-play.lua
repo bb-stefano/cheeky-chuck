@@ -6,7 +6,7 @@ return {
   platform = 'android',
   appName = 'Cheeky Chuck',
   appVersion = '1.6',
-  androidVersionCode = 8,
+  androidVersionCode = 9,
   androidAppPackage = 'com.jocogiant.cheekychuck',
   targetStore = 'google',
   dstPath = '/Users/stefano/work/games/cheeky-chuck/build/play',
